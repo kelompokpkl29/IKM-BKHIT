@@ -238,3 +238,48 @@ a:hover {
     text-align: center;
     margin-top: 40px;
 }
+
+/* ... (kode CSS yang sudah ada di atas) ... */
+
+/* --- Gaya Tambahan untuk Opsi Jawaban Interaktif --- */
+.pertanyaan-item .form-check {
+    position: relative; /* Penting untuk animasi border */
+    padding: 10px 15px; /* Padding di dalam kotak opsi */
+    margin-bottom: 10px; /* Jarak antar kotak opsi */
+    border: 1px solid #dee2e6; /* Border default */
+    border-radius: 8px; /* Sudut membulat */
+    background-color: #fff; /* Latar belakang putih */
+    cursor: pointer; /* Menandakan bisa diklik */
+    transition: all 0.2s ease-in-out; /* Transisi untuk semua perubahan */
+    display: flex; /* Untuk menata input dan label */
+    align-items: center; /* Menyelaraskan input dan label vertikal */
+}
+
+.pertanyaan-item .form-check:hover {
+    border-color: #007bff; /* Border biru saat di-hover */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Bayangan biru muda saat di-hover */
+    transform: translateY(-2px); /* Efek angkat sedikit */
+}
+
+.pertanyaan-item .form-check-input {
+    margin-right: 15px; /* Jarak antara radio button dan teks */
+    flex-shrink: 0; /* Mencegah input menyusut */
+}
+
+.pertanyaan-item .form-check-label {
+    flex-grow: 1; /* Biarkan label memenuhi sisa ruang */
+    cursor: pointer; /* Pastikan label juga bisa diklik */
+    margin-left: 0 !important; /* Override Bootstrap default margin-left */
+}
+
+/* Gaya saat radio button dipilih */
+.pertanyaan-item .form-check-input:checked + .form-check-label {
+    font-weight: bold; /* Teks tebal saat dipilih */
+    color: #007bff; /* Warna teks biru saat dipilih */
+}
+
+.pertanyaan-item .form-check-input:checked ~ .form-check { /* Memilih elemen form-check itu sendiri saat input dipilih */
+    border-color: #28a745; /* Border hijau saat dipilih */
+    background-color: #e6ffed; /* Latar belakang hijau muda saat dipilih */
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); /* Bayangan hijau saat dipilih */
+}
