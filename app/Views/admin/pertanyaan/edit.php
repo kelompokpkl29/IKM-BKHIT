@@ -3,54 +3,40 @@
 <?= $this->section('title') ?>Edit Pertanyaan<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<h1 class="mt-4">Edit Pertanyaan untuk "Demo Kuesioner (ID: <?= isset($kuesioner_id) ? $kuesioner_id : '?' ?>)"</h1>
-<a href="<?= base_url('admin/pertanyaan/' . (isset($kuesioner_id) ? $kuesioner_id : 1)) ?>" class="btn btn-secondary mb-3">Kembali ke Daftar Pertanyaan</a>
-
-<?php
-// Dummy data untuk edit pertanyaan
-$edited_pertanyaan_teks_dummy = "Bagaimana tingkat kemudahan dalam mengakses layanan kami? (Edit Demo)";
-$edited_pertanyaan_jenis_dummy = "skala"; // atau "pilihan_ganda", "isian"
-$edited_pertanyaan_urutan_dummy = 1;
-$edited_pertanyaan_opsi_dummy = [
-    ['teks' => 'Sangat Mudah (Edit)', 'nilai' => 5],
-    ['teks' => 'Mudah (Edit)', 'nilai' => 4],
-    ['teks' => 'Cukup Mudah (Edit)', 'nilai' => 3],
-    ['teks' => 'Sulit (Edit)', 'nilai' => 2],
-    ['teks' => 'Sangat Sulit (Edit)', 'nilai' => 1],
-];
-?>
+<h1 class="mt-4">Edit Pertanyaan untuk "<?= esc($kuesioner['nama_kuesioner']) ?>"</h1>
+<a href="<?= base_url('admin/pertanyaan/' . $kuesioner['id']) ?>" class="btn btn-secondary mb-3">Kembali ke Daftar Pertanyaan</a>
 
 <div class="card shadow mb-4">
     <div class="card-body">
-        <form action="<?= base_url('admin/pertanyaan/update/' . (isset($pertanyaan_id) ? $pertanyaan_id : 1)) ?>" method="post">
+        <form action="<?= base_url('admin/pertanyaan/update/' . $pertanyaan['id']) ?>" method="post">
             <?= csrf_field() ?>
-            <input type="hidden" name="kuesioner_id" value="<?= isset($kuesioner_id) ? $kuesioner_id : 1 ?>">
+            <input type="hidden" name="kuesioner_id" value="<?= esc($kuesioner['id']) ?>">
 
             <div class="mb-3">
                 <label for="teks_pertanyaan" class="form-label">Teks Pertanyaan <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="teks_pertanyaan" name="teks_pertanyaan" rows="3" required><?= $edited_pertanyaan_teks_dummy ?></textarea>
+                <textarea class="form-control" id="teks_pertanyaan" name="teks_pertanyaan" rows="3" required><?= old('teks_pertanyaan', $pertanyaan['teks_pertanyaan']) ?></textarea>
             </div>
             <div class="mb-3">
                 <label for="jenis_jawaban" class="form-label">Jenis Jawaban <span class="text-danger">*</span></label>
                 <select class="form-select" id="jenis_jawaban" name="jenis_jawaban" required>
-                    <option value="skala" <?= $edited_pertanyaan_jenis_dummy == 'skala' ? 'selected' : '' ?>>Skala (e.g., 1-5)</option>
-                    <option value="pilihan_ganda" <?= $edited_pertanyaan_jenis_dummy == 'pilihan_ganda' ? 'selected' : '' ?>>Pilihan Ganda</option>
-                    <option value="isian" <?= $edited_pertanyaan_jenis_dummy == 'isian' ? 'selected' : '' ?>>Isian Teks</option>
+                    <option value="skala" <?= old('jenis_jawaban', $pertanyaan['jenis_jawaban']) == 'skala' ? 'selected' : '' ?>>Skala (e.g., 1-5)</option>
+                    <option value="pilihan_ganda" <?= old('jenis_jawaban', $pertanyaan['jenis_jawaban']) == 'pilihan_ganda' ? 'selected' : '' ?>>Pilihan Ganda</option>
+                    <option value="isian" <?= old('jenis_jawaban', $pertanyaan['jenis_jawaban']) == 'isian' ? 'selected' : '' ?>>Isian Teks</option>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="urutan" class="form-label">Urutan <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="urutan" name="urutan" value="<?= $edited_pertanyaan_urutan_dummy ?>" required min="1">
+                <input type="number" class="form-control" id="urutan" name="urutan" value="<?= old('urutan', $pertanyaan['urutan']) ?>" required min="1">
             </div>
 
-            <div id="opsi_jawaban_section" style="display: <?= ($edited_pertanyaan_jenis_dummy == 'skala' || $edited_pertanyaan_jenis_dummy == 'pilihan_ganda') ? 'block' : 'none' ?>;">
+            <div id="opsi_jawaban_section" style="display: <?= ($pertanyaan['jenis_jawaban'] == 'skala' || $pertanyaan['jenis_jawaban'] == 'pilihan_ganda') ? 'block' : 'none' ?>;">
                 <h5 class="mb-3">Opsi Jawaban</h5>
                 <div id="opsi_list">
-                    <?php if (!empty($edited_pertanyaan_opsi_dummy)): ?>
-                        <?php foreach ($edited_pertanyaan_opsi_dummy as $opsi): ?>
+                    <?php if (!empty($opsiJawaban)): ?>
+                        <?php foreach ($opsiJawaban as $opsi): ?>
                             <div class="input-group mb-2 opsi-item">
-                                <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" value="<?= $opsi['teks'] ?>" required>
-                                <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)" value="<?= $opsi['nilai'] ?>">
+                                <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" value="<?= esc($opsi['opsi_teks']) ?>" required>
+                                <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)" value="<?= esc($opsi['nilai']) ?>">
                                 <button type="button" class="btn btn-danger remove-opsi">Hapus</button>
                             </div>
                         <?php endforeach; ?>

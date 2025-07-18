@@ -1,10 +1,8 @@
 <?php
-
-namespace App\Controllers; // Pastikan namespace ini benar
-
-class Home extends BaseController // Pastikan nama kelas ini benar
+namespace App\Controllers;
+class Home extends BaseController
 {
-    public function index() // Pastikan metode ini ada dan public
+    public function index()
     {
         return view('public/landing_page');
     }

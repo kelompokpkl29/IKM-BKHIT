@@ -12,14 +12,14 @@
             <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="nama_kuesioner" class="form-label">Nama Kuesioner <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nama_kuesioner" name="nama_kuesioner" value="Nama Kuesioner Baru (Demo)" required>
+                <input type="text" class="form-control" id="nama_kuesioner" name="nama_kuesioner" value="<?= old('nama_kuesioner') ?>" required>
             </div>
             <div class="mb-3">
                 <label for="deskripsi" class="form-label">Deskripsi</label>
-                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3">Deskripsi kuesioner baru ini (Demo).</textarea>
+                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3"><?= old('deskripsi') ?></textarea>
             </div>
             <div class="form-check form-switch mb-3">
-                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" <?= old('is_active', true) ? 'checked' : '' ?>>
                 <label class="form-check-label" for="is_active">Aktif</label>
             </div>
             <button type="submit" class="btn btn-primary">Simpan Kuesioner</button>

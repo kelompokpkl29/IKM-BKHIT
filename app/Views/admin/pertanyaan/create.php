@@ -3,46 +3,51 @@
 <?= $this->section('title') ?>Tambah Pertanyaan<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<h1 class="mt-4">Tambah Pertanyaan untuk "Demo Kuesioner (ID: <?= isset($kuesioner_id) ? $kuesioner_id : '?' ?>)"</h1>
-<a href="<?= base_url('admin/pertanyaan/' . (isset($kuesioner_id) ? $kuesioner_id : 1)) ?>" class="btn btn-secondary mb-3">Kembali ke Daftar Pertanyaan</a>
+<h1 class="mt-4">Tambah Pertanyaan untuk "<?= esc($kuesioner['nama_kuesioner']) ?>"</h1>
+<a href="<?= base_url('admin/pertanyaan/' . $kuesioner['id']) ?>" class="btn btn-secondary mb-3">Kembali ke Daftar Pertanyaan</a>
 
 <div class="card shadow mb-4">
     <div class="card-body">
         <form action="<?= base_url('admin/pertanyaan/store') ?>" method="post">
             <?= csrf_field() ?>
-            <input type="hidden" name="kuesioner_id" value="<?= isset($kuesioner_id) ? $kuesioner_id : 1 ?>">
+            <input type="hidden" name="kuesioner_id" value="<?= esc($kuesioner['id']) ?>">
 
             <div class="mb-3">
                 <label for="teks_pertanyaan" class="form-label">Teks Pertanyaan <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="teks_pertanyaan" name="teks_pertanyaan" rows="3" required>Pertanyaan baru saya (Demo)</textarea>
+                <textarea class="form-control" id="teks_pertanyaan" name="teks_pertanyaan" rows="3" required><?= old('teks_pertanyaan') ?></textarea>
             </div>
             <div class="mb-3">
                 <label for="jenis_jawaban" class="form-label">Jenis Jawaban <span class="text-danger">*</span></label>
                 <select class="form-select" id="jenis_jawaban" name="jenis_jawaban" required>
                     <option value="">Pilih Jenis Jawaban</option>
-                    <option value="skala" selected>Skala (e.g., 1-5)</option>
-                    <option value="pilihan_ganda">Pilihan Ganda</option>
-                    <option value="isian">Isian Teks</option>
+                    <option value="skala" <?= old('jenis_jawaban') == 'skala' ? 'selected' : '' ?>>Skala (e.g., 1-5)</option>
+                    <option value="pilihan_ganda" <?= old('jenis_jawaban') == 'pilihan_ganda' ? 'selected' : '' ?>>Pilihan Ganda</option>
+                    <option value="isian" <?= old('jenis_jawaban') == 'isian' ? 'selected' : '' ?>>Isian Teks</option>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="urutan" class="form-label">Urutan <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="urutan" name="urutan" value="5" required min="1">
+                <input type="number" class="form-control" id="urutan" name="urutan" value="<?= old('urutan') ?>" required min="1">
             </div>
 
-            <div id="opsi_jawaban_section">
+            <div id="opsi_jawaban_section" style="display: none;">
                 <h5 class="mb-3">Opsi Jawaban</h5>
                 <div id="opsi_list">
-                    <div class="input-group mb-2 opsi-item">
-                        <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" value="Sangat Setuju (Demo)" required>
-                        <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)" value="5">
-                        <button type="button" class="btn btn-danger remove-opsi">Hapus</button>
-                    </div>
-                    <div class="input-group mb-2 opsi-item">
-                        <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" value="Setuju (Demo)" required>
-                        <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)" value="4">
-                        <button type="button" class="btn btn-danger remove-opsi">Hapus</button>
-                    </div>
+                    <?php if (old('opsi_teks')): ?>
+                        <?php foreach (old('opsi_teks') as $index => $teks): ?>
+                            <div class="input-group mb-2 opsi-item">
+                                <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" value="<?= esc($teks) ?>" required>
+                                <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)" value="<?= esc(old('opsi_nilai')[$index]) ?>">
+                                <button type="button" class="btn btn-danger remove-opsi">Hapus</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="input-group mb-2 opsi-item">
+                            <input type="text" class="form-control" name="opsi_teks[]" placeholder="Opsi Teks" required>
+                            <input type="number" class="form-control" name="opsi_nilai[]" placeholder="Nilai (optional)">
+                            <button type="button" class="btn btn-danger remove-opsi">Hapus</button>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <button type="button" class="btn btn-info btn-sm mt-2" id="add_opsi_btn">Tambah Opsi</button>
             </div>

@@ -5,9 +5,9 @@
 <?= $this->section('content') ?>
 <h1 class="mt-4">Edit Profil Admin</h1>
 <?php
-// Dummy data untuk profil admin
-$admin_username_dummy = "admin";
-$admin_email_dummy = "admin@example.com";
+// Default values for the form (from database $user)
+$currentUsername = isset($user['username']) ? $user['username'] : '';
+$currentEmail = isset($user['email']) ? $user['email'] : '';
 ?>
 <div class="card shadow mb-4">
     <div class="card-header">
@@ -18,11 +18,11 @@ $admin_email_dummy = "admin@example.com";
             <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="username" name="username" value="<?= $admin_username_dummy ?>" required>
+                <input type="text" class="form-control" id="username" name="username" value="<?= old('username', $currentUsername) ?>" required>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" value="<?= $admin_email_dummy ?>" required>
+                <input type="email" class="form-control" id="email" name="email" value="<?= old('email', $currentEmail) ?>" required>
             </div>
             <hr>
             <h5>Ubah Password (Kosongkan jika tidak ingin mengubah)</h5>

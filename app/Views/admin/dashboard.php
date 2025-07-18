@@ -4,21 +4,15 @@
 
 <?= $this->section('content') ?>
 <h1 class="mt-4">Dashboard Admin</h1>
-<p class="lead">Selamat datang, Admin (Demo)!</p>
+<p class="lead">Selamat datang, Admin (<?php if(session()->get('logged_in')) echo session()->get('username'); else echo 'Guest'; ?>)!</p>
 
 <?php
-// Dummy data untuk dashboard
-$totalKuesionerDummy = 12;
-$activeKuesionerDummy = 8;
-$totalRespondenDummy = 2345;
-$ikmAverageDummy = 3.92; // Skala 1-5
-$recentKuesionerDummy = [
-    ['nama' => 'Kuesioner Pelayanan Publik', 'active' => true],
-    ['nama' => 'Kuesioner Kepuasan Internal', 'active' => false],
-    ['nama' => 'Kuesioner Produk Baru', 'active' => true],
-    ['nama' => 'Kuesioner Pengalaman Pengguna Website', 'active' => true],
-    ['nama' => 'Kuesioner Kecepatan Respon Layanan', 'active' => true],
-];
+// Data dashboard diambil dari controller (DB)
+$totalKuesioner = $totalKuesioner ?? 0;
+$activeKuesioner = $activeKuesioner ?? 0;
+$totalResponden = $totalResponden ?? 0;
+$ikmAverage = $ikmAverage ?? 0.0;
+$recentKuesioner = $recentKuesioner ?? [];
 ?>
 
 <div class="row">
@@ -30,7 +24,7 @@ $recentKuesionerDummy = [
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Jumlah Kuesioner</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?= $totalKuesionerDummy ?>
+                            <?= esc($totalKuesioner) ?>
                         </div>
                     </div>
                 </div>
@@ -46,7 +40,7 @@ $recentKuesionerDummy = [
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Total Responden</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?= $totalRespondenDummy ?>
+                            <?= esc($totalResponden) ?>
                         </div>
                     </div>
                 </div>
@@ -62,7 +56,7 @@ $recentKuesionerDummy = [
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                             IKM Rata-rata</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?= number_format($ikmAverageDummy, 2) ?> / 5.0
+                            <?= number_format(esc($ikmAverage), 2) ?> / 5.0
                         </div>
                     </div>
                 </div>
@@ -78,7 +72,7 @@ $recentKuesionerDummy = [
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Kuesioner Aktif</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <?= $activeKuesionerDummy ?>
+                            <?= esc($activeKuesioner) ?>
                         </div>
                     </div>
                 </div>
@@ -94,14 +88,14 @@ $recentKuesionerDummy = [
                 <h6 class="m-0 font-weight-bold">Kuesioner Terbaru</h6>
             </div>
             <div class="card-body">
-                <?php if (empty($recentKuesionerDummy)): ?>
+                <?php if (empty($recentKuesioner)): ?>
                     <p class="text-muted">Belum ada kuesioner yang ditambahkan.</p>
                 <?php else: ?>
                     <ul class="list-group">
-                        <?php foreach ($recentKuesionerDummy as $k): ?>
+                        <?php foreach ($recentKuesioner as $k): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <?= $k['nama'] ?>
-                                <span class="badge bg-<?= $k['active'] ? 'success' : 'secondary' ?>"><?= $k['active'] ? 'Aktif' : 'Tidak Aktif' ?></span>
+                                <?= esc($k['nama_kuesioner']) ?>
+                                <span class="badge bg-<?= $k['is_active'] ? 'success' : 'secondary' ?>"><?= esc($k['is_active'] ? 'Aktif' : 'Tidak Aktif') ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -115,7 +109,7 @@ $recentKuesionerDummy = [
                 <h6 class="m-0 font-weight-bold">Statistik Ringkas</h6>
             </div>
             <div class="card-body">
-                <p>Grafik dan visualisasi data akan ditampilkan di sini (demo).</p>
+                <p>Grafik dan visualisasi data akan ditampilkan di sini.</p>
                 <div style="height: 200px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; border-radius: 5px;">
                     (Placeholder Grafik)
                 </div>

@@ -1,27 +1,11 @@
 <?= $this->extend('layout/admin_template') ?>
 
-<?= $this->section('title') ?>Pertanyaan: Demo Kuesioner<?= $this->endSection() ?>
+<?= $this->section('title') ?>Pertanyaan: <?= esc($kuesioner['nama_kuesioner']) ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<h1 class="mt-4">Pertanyaan untuk Kuesioner: "Demo Kuesioner (ID: <?= isset($kuesioner_id) ? $kuesioner_id : '?' ?>)"</h1>
+<h1 class="mt-4">Pertanyaan untuk Kuesioner: "<?= esc($kuesioner['nama_kuesioner']) ?>"</h1>
 <a href="<?= base_url('admin/kuesioner') ?>" class="btn btn-secondary mb-3">Kembali ke Kuesioner</a>
-<a href="<?= base_url('admin/pertanyaan/create/' . (isset($kuesioner_id) ? $kuesioner_id : 1)) ?>" class="btn btn-primary mb-3">Tambah Pertanyaan Baru</a>
-
-<?php
-// Dummy data untuk pertanyaan
-$pertanyaan_admin_dummy = [
-    ['id' => 1, 'urutan' => 1, 'teks' => 'Bagaimana tingkat kemudahan dalam mengakses layanan kami?', 'jenis' => 'skala', 'opsi' => [
-        ['teks' => 'Sangat Mudah', 'nilai' => 5], ['teks' => 'Mudah', 'nilai' => 4], ['teks' => 'Cukup Mudah', 'nilai' => 3],
-    ]],
-    ['id' => 2, 'urutan' => 2, 'teks' => 'Bagaimana kecepatan respon petugas dalam melayani kebutuhan Anda?', 'jenis' => 'skala', 'opsi' => [
-        ['teks' => 'Sangat Cepat', 'nilai' => 5], ['teks' => 'Cepat', 'nilai' => 4],
-    ]],
-    ['id' => 3, 'urutan' => 3, 'teks' => 'Apakah Anda puas dengan keramahan petugas kami?', 'jenis' => 'pilihan_ganda', 'opsi' => [
-        ['teks' => 'Sangat Puas'], ['teks' => 'Puas'],
-    ]],
-    ['id' => 4, 'urutan' => 4, 'teks' => 'Sebutkan saran atau masukan Anda:', 'jenis' => 'isian', 'opsi' => []],
-];
-?>
+<a href="<?= base_url('admin/pertanyaan/create/' . $kuesioner['id']) ?>" class="btn btn-primary mb-3">Tambah Pertanyaan Baru</a>
 
 <div class="card shadow mb-4">
     <div class="card-body">
@@ -38,32 +22,32 @@ $pertanyaan_admin_dummy = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($pertanyaan_admin_dummy)): ?>
+                    <?php if (empty($pertanyaan)): ?>
                         <tr>
-                            <td colspan="6" class="text-center">Belum ada pertanyaan untuk kuesioner ini (demo).</td>
+                            <td colspan="6" class="text-center">Belum ada pertanyaan untuk kuesioner ini.</td>
                         </tr>
                     <?php else: ?>
                         <?php $no = 1; ?>
-                        <?php foreach ($pertanyaan_admin_dummy as $item) : ?>
+                        <?php foreach ($pertanyaan as $item) : ?>
                             <tr>
                                 <td><?= $no++ ?></td>
-                                <td><?= $item['urutan'] ?></td>
-                                <td><?= $item['teks'] ?></td>
-                                <td><?= $item['jenis'] ?></td>
+                                <td><?= esc($item['urutan']) ?></td>
+                                <td><?= esc($item['teks_pertanyaan']) ?></td>
+                                <td><?= esc($item['jenis_jawaban']) ?></td>
                                 <td>
-                                    <?php if ($item['jenis'] !== 'isian' && !empty($item['opsi'])): ?>
+                                    <?php if ($item['jenis_jawaban'] !== 'isian' && !empty($item['opsi'])): ?>
                                         <ul class="list-unstyled mb-0">
                                             <?php foreach ($item['opsi'] as $opsi): ?>
-                                                <li><?= $opsi['teks'] ?> <?= isset($opsi['nilai']) && $opsi['nilai'] !== null ? '(' . $opsi['nilai'] . ')' : '' ?></li>
+                                                <li><?= esc($opsi['opsi_teks']) ?> <?= isset($opsi['nilai']) && $opsi['nilai'] !== null ? '(' . esc($opsi['nilai']) . ')' : '' ?></li>
                                             <?php endforeach; ?>
                                         </ul>
-                                    <?php elseif ($item['jenis'] === 'isian'): ?>
+                                    <?php elseif ($item['jenis_jawaban'] === 'isian'): ?>
                                         <span class="text-muted">Isian Teks</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <a href="<?= base_url('admin/pertanyaan/edit/' . $item['id']) ?>" class="btn btn-warning btn-sm">Edit</a>
-                                    <a href="<?= base_url('admin/pertanyaan/delete/' . $item['id']) ?>" class="btn btn-danger btn-sm" onclick="alert('Hapus Pertanyaan ini? (Demo)')">Hapus</a>
+                                    <a href="<?= base_url('admin/pertanyaan/delete/' . $item['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini? Ini akan menghapus semua jawaban terkait!')">Hapus</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

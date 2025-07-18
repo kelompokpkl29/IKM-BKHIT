@@ -7,16 +7,7 @@
 <p class="lead">Lihat rekapitulasi data dan analisis hasil kuesioner.</p>
 
 <?php
-// Dummy data untuk halaman hasil
-$totalRespondenHasilDummy = 850;
-$ikmRataRataHasilDummy = 3.75;
-$persentasePuasHasilDummy = 88;
-
-$kuesionerListHasilDummy = [
-    ['id' => 1, 'nama' => 'Kuesioner Pelayanan Administrasi'],
-    ['id' => 2, 'nama' => 'Kuesioner Fasilitas Umum'],
-    ['id' => 3, 'nama' => 'Kuesioner Kualitas Informasi'],
-];
+$kuesionerList = $kuesionerList ?? []; // Data dari controller
 ?>
 
 <div class="card shadow mb-4">
@@ -29,9 +20,11 @@ $kuesionerListHasilDummy = [
                 <label for="selectKuesioner" class="form-label">Pilih Kuesioner:</label>
                 <select class="form-select" id="selectKuesioner" name="kuesioner_id">
                     <option value="">Semua Kuesioner</option>
-                    <?php foreach ($kuesionerListHasilDummy as $kuesioner): ?>
-                        <option value="<?= $kuesioner['id'] ?>"><?= $kuesioner['nama'] ?></option>
-                    <?php endforeach; ?>
+                    <?php if (!empty($kuesionerList)): ?>
+                        <?php foreach ($kuesionerList as $kuesioner): ?>
+                            <option value="<?= esc($kuesioner['id']) ?>"><?= esc($kuesioner['nama_kuesioner']) ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select>
             </div>
             <div class="col-md-3">
@@ -57,15 +50,15 @@ $kuesionerListHasilDummy = [
         <div class="row text-center mb-4">
             <div class="col-md-4">
                 <h3>Total Responden</h3>
-                <p class="display-5 text-primary"><?= $totalRespondenHasilDummy ?></p>
+                <p class="display-5 text-primary">850</p>
             </div>
             <div class="col-md-4">
                 <h3>Nilai IKM Rata-rata</h3>
-                <p class="display-5 text-success"><?= number_format($ikmRataRataHasilDummy, 2) ?> <small>/ 4.0</small></p>
+                <p class="display-5 text-success">3.75 <small>/ 4.0</small></p>
             </div>
             <div class="col-md-4">
                 <h3>Persentase Puas</h3>
-                <p class="display-5 text-info"><?= $persentasePuasHasilDummy ?>%</p>
+                <p class="display-5 text-info">88%</p>
             </div>
         </div>
         <hr>

@@ -6,16 +6,6 @@
 <h1 class="mt-4">Manajemen Kuesioner</h1>
 <a href="<?= base_url('admin/kuesioner/create') ?>" class="btn btn-primary mb-3">Tambah Kuesioner Baru</a>
 
-<?php
-// Dummy data untuk daftar kuesioner admin
-$kuesioner_admin_dummy = [
-    ['id' => 1, 'nama' => 'Kuesioner Pelayanan Administrasi', 'deskripsi' => 'Survei kepuasan terhadap proses dan kecepatan pelayanan administrasi.', 'active' => true],
-    ['id' => 2, 'nama' => 'Kuesioner Fasilitas Umum', 'deskripsi' => 'Survei tingkat kepuasan terhadap ketersediaan dan kebersihan fasilitas umum.', 'active' => true],
-    ['id' => 3, 'nama' => 'Kuesioner Layanan Online', 'deskripsi' => 'Survei kepuasan penggunaan platform layanan online.', 'active' => false],
-    ['id' => 4, 'nama' => 'Kuesioner Kualitas Informasi', 'deskripsi' => 'Survei kepuasan terhadap kejelasan dan akurasi informasi yang diberikan.', 'active' => true],
-];
-?>
-
 <div class="card shadow mb-4">
     <div class="card-body">
         <div class="table-responsive">
@@ -30,19 +20,19 @@ $kuesioner_admin_dummy = [
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($kuesioner_admin_dummy)): ?>
+                    <?php if (empty($kuesioner)): ?>
                         <tr>
-                            <td colspan="5" class="text-center">Belum ada data kuesioner (demo).</td>
+                            <td colspan="5" class="text-center">Belum ada data kuesioner.</td>
                         </tr>
                     <?php else: ?>
                         <?php $no = 1; ?>
-                        <?php foreach ($kuesioner_admin_dummy as $item) : ?>
+                        <?php foreach ($kuesioner as $item) : ?>
                             <tr>
                                 <td><?= $no++ ?></td>
-                                <td><?= $item['nama'] ?></td>
-                                <td><?= $item['deskripsi'] ?></td>
+                                <td><?= esc($item['nama_kuesioner']) ?></td>
+                                <td><?= esc($item['deskripsi']) ?></td>
                                 <td>
-                                    <?php if ($item['active']) : ?>
+                                    <?php if ($item['is_active']) : ?>
                                         <span class="badge bg-success text-white">Aktif</span>
                                     <?php else : ?>
                                         <span class="badge bg-secondary text-white">Tidak Aktif</span>
@@ -51,7 +41,7 @@ $kuesioner_admin_dummy = [
                                 <td>
                                     <a href="<?= base_url('admin/pertanyaan/' . $item['id']) ?>" class="btn btn-info btn-sm">Pertanyaan</a>
                                     <a href="<?= base_url('admin/kuesioner/edit/' . $item['id']) ?>" class="btn btn-warning btn-sm">Edit</a>
-                                    <a href="<?= base_url('admin/kuesioner/delete/' . $item['id']) ?>" class="btn btn-danger btn-sm" onclick="alert('Hapus Kuesioner ini? (Demo)')">Hapus</a>
+                                    <a href="<?= base_url('admin/kuesioner/delete/' . $item['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus kuesioner ini? Tindakan ini akan menghapus semua pertanyaan dan jawaban terkait!')">Hapus</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

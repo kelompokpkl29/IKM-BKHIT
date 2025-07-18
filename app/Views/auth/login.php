@@ -65,21 +65,20 @@
                 <?= csrf_field() ?>
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required value="admin">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required value="<?= old('username') ?>">
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required value="password">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required>
                 </div>
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary btn-lg">Login</button>
                 </div>
-            </form>
-            
-            <div class="d-grid mt-3">
-                <a href="<?= base_url('/') ?>" class="btn btn-outline-secondary btn-lg">Kembali ke Beranda</a>
-            </div>
-            </div>
+                
+                <div class="d-grid mt-3">
+                    <a href="<?= base_url('/') ?>" class="btn btn-outline-secondary btn-lg">Kembali ke Beranda</a>
+                </div>
+                </div>
         <div class="card-footer text-center mt-3 text-muted" style="background-color: transparent; border-top: none;">
             <small>&copy; 2025 Kuisioner IKM. All rights reserved.</small>
         </div>
