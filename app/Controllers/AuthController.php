@@ -25,29 +25,24 @@ class AuthController extends BaseController
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
-        // --- DEBUGGING SINI ---
-        echo "Mencoba login dengan Username: " . esc($username) . " dan Password: " . esc($password) . "<br>";
-        // --- DEBUGGING SINI ---
+        echo "<h2>DEBUG LOGIN PROCESS</h2>";
+        echo "Mencoba login dengan Username: <strong>" . esc($username) . "</strong> dan Password: <strong>" . esc($password) . "</strong><br>";
 
         // Cari user di database
         $user = $this->userModel->where('username', $username)->first();
 
         if ($user) {
-            echo "User ditemukan di DB: " . esc($user['username']) . "<br>";
-            echo "Hash dari DB: " . esc($user['password']) . "<br>";
-            // Verifikasi password yang diinput dengan hash dari DB
+            echo "User ditemukan di DB. ID: " . esc($user['id']) . ", Username: " . esc($user['username']) . ", Email: " . esc($user['email']) . "<br>";
+            echo "Hash Password dari DB: <strong>" . esc($user['password']) . "</strong><br>";
+            
+            // Lakukan verifikasi password
             $password_matches = password_verify($password, $user['password']);
-            echo "Hasil password_verify(): " . ($password_matches ? "TRUE" : "FALSE") . "<br>";
-            // --- DEBUGGING SINI ---
+            
+            echo "Hasil password_verify('input_password', 'hash_dari_db'): <strong>" . ($password_matches ? "TRUE" : "FALSE") . "</strong><br>";
+            
+            // --- DEBUG: Output kondisi sebelum redirect ---
             if ($password_matches) {
-                echo "Password Cocok! Data Sesi yang akan diatur:<br>";
-                dd(['user_id' => $user['id'], 'username' => $user['username'], 'logged_in' => TRUE]);
-            } else {
-                dd("Password TIDAK cocok untuk user " . esc($user['username']));
-            }
-            // --- DEBUGGING SINI ---
-
-            if ($password_matches) {
+                echo "<p style='color:green;'><strong>LOGIN BERHASIL!</strong> Seharusnya redirect ke dashboard.</p>";
                 $ses_data = [
                     'user_id'   => $user['id'],
                     'username'  => $user['username'],
@@ -55,20 +50,34 @@ class AuthController extends BaseController
                     'logged_in' => TRUE
                 ];
                 $session->set($ses_data);
-                return redirect()->to(base_url('admin/dashboard'))->with('success', 'Selamat datang, ' . $user['username'] . '!');
+                echo "Data Sesi Disimpan:<pre>"; print_r($session->get()); echo "</pre>";
+                // Ini akan menghentikan eksekusi setelah menampilkan debug,
+                // jika Anda melihat ini, artinya login berhasil secara logika.
+                // Hapus baris 'exit;' untuk melanjutkan redirect.
+                exit('DEBUG: Login berhasil, sesi diatur. Mohon hapus baris `exit();` untuk melanjutkan.');
+                
+                // Jika sudah yakin, uncomment baris ini dan hapus exit; di atas
+                // return redirect()->to(base_url('admin/dashboard'))->with('success', 'Selamat datang, ' . $user['username'] . '!');
             } else {
-                $session->setFlashdata('error', 'Username atau Password salah.');
-                return redirect()->back()->withInput();
+                echo "<p style='color:red;'><strong>PASSWORD TIDAK COCOK!</strong> Seharusnya kembali ke halaman login.</p>";
+                // Ini akan menghentikan eksekusi setelah menampilkan debug
+                exit('DEBUG: Login gagal karena password tidak cocok. Mohon hapus baris `exit();` untuk melanjutkan.');
+                
+                // Jika sudah yakin, uncomment baris ini dan hapus exit; di atas
+                // $session->setFlashdata('error', 'Username atau Password salah.');
+                // return redirect()->back()->withInput();
             }
         } else {
-            // --- DEBUGGING SINI ---
-            dd("User '" . esc($username) . "' tidak ditemukan di database.");
-            // --- DEBUGGING SINI ---
-            $session->setFlashdata('error', 'Username atau Password salah.');
-            return redirect()->back()->withInput();
+            echo "<p style='color:red;'><strong>USER TIDAK DITEMUKAN!</strong> User dengan username '" . esc($username) . "' tidak ada di database.</p>";
+            // Ini akan menghentikan eksekusi setelah menampilkan debug
+            exit('DEBUG: Login gagal karena user tidak ditemukan. Mohon hapus baris `exit();` untuk melanjutkan.');
+            
+            // Jika sudah yakin, uncomment baris ini dan hapus exit; di atas
+            // $session->setFlashdata('error', 'Username atau Password salah.');
+            // return redirect()->back()->withInput();
         }
     }
-    // ... (fungsi logout) ...
+
     public function logout()
     {
         $session = session();
