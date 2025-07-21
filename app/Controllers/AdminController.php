@@ -6,9 +6,6 @@ use App\Models\OpsiJawabanModel;
 use App\Models\UserModel;
 use App\Models\JawabanPenggunaModel;
 
-require_once APPPATH . '../vendor/tecnickcom/tcpdf/tcpdf.php';
-
-
 class AdminController extends BaseController
 {
     protected $kuesionerModel;
@@ -36,31 +33,14 @@ class AdminController extends BaseController
                                      ->get()
                                      ->getRow('total_ips');
 
-        // Perhitungan IKM Rata-rata (menggunakan nilai dari opsi jawaban)
-        // Rumus IKM sederhana: (Total Nilai Jawaban Opsi / Total Jawaban Opsi)
-        $result = $this->jawabanPenggunaModel
-                       ->select('SUM(opsi_jawaban.nilai) as total_nilai, COUNT(jawaban_pengguna.id) as total_jawaban')
-                       ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                       ->where('opsi_jawaban.nilai IS NOT NULL') // Hanya jawaban yang memiliki nilai (skala)
-                       ->first();
+        $avgScoreResult = $this->jawabanPenggunaModel
+                                 ->select('AVG(opsi_jawaban.nilai) as average_score')
+                                 ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+                                 ->where('opsi_jawaban.nilai IS NOT NULL')
+                                 ->first();
 
-        $totalNilai = $result['total_nilai'] ?? 0;
-        $totalJawabanValid = $result['total_jawaban'] ?? 0;
-        
-        $ikm = 0;
-        if ($totalJawabanValid > 0) {
-            // Asumsi skala 1-5, dan nilai maksimal per pertanyaan adalah 5
-            // Rumus IKM: (Jumlah nilai jawaban x 1) / (jumlah responden x jumlah pertanyaan) x 100
-            // Karena kita menghitung rata-rata per jawaban, ini bisa disederhanakan
-            // Jika skala 1-5, IKM rata-rata adalah nilai rata-rata dari semua jawaban skala.
-            $ikm = ($totalNilai / $totalJawabanValid); // Nilai rata-rata per item
-            // Untuk mengubahnya menjadi skala 0-100%, jika IKM Anda menggunakan skala 1-5:
-            // (Nilai Rata-rata / Nilai Skala Tertinggi) * 100
-            // $ikm = ($ikm / 5) * 100;
-        }
-
-        $data['ikmAverage'] = round($ikm, 2); // Nilai IKM Rata-rata (misal: 3.92)
-
+        $data['ikmAverage'] = $avgScoreResult['average_score'] ? round($avgScoreResult['average_score'], 2) : 0;
+        if ($data['ikmAverage'] > 5.0) $data['ikmAverage'] = 5.0;
 
         $data['recentKuesioner'] = $this->kuesionerModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
 
@@ -73,7 +53,7 @@ class AdminController extends BaseController
     }
     public function createKuesioner() { return view('admin/kuesioner/create'); }
     public function storeKuesioner() {
-        // Validasi dasar tetap diaktifkan untuk CRUD
+        // Validasi dasar (bisa diperluas jika diperlukan)
         $rules = [
             'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
             'deskripsi'      => 'permit_empty',
@@ -275,10 +255,10 @@ class AdminController extends BaseController
             'email'    => 'required|valid_email|max_length[255]',
         ];
         // Validasi unik untuk username dan email jika diubah
-        if ($user && $this->request->getPost('username') !== $user['username']) { // Hanya cek unik jika username berubah
+        if ($user && $this->request->getPost('username') !== $user['username']) {
             $rules['username'] .= '|is_unique[users.username,id,' . $userId . ']';
         }
-        if ($user && $this->request->getPost('email') !== $user['email']) { // Hanya cek unik jika email berubah
+        if ($user && $this->request->getPost('email') !== $user['email']) {
             $rules['email'] .= '|is_unique[users.email,id,' . $userId . ']';
         }
 
@@ -353,7 +333,8 @@ class AdminController extends BaseController
                              ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
                              ->where('opsi_jawaban.nilai IS NOT NULL')
                              ->first();
-        $data['ikmRataRataHasil'] = round($avgIkmResult['average_score'] ?? 0, 2);
+        $ikmRataRataHasil = round($avgIkmResult['average_score'] ?? 0, 2);
+        $data['ikmRataRataHasil'] = $ikmRataRataHasil;
 
         // Perhitungan persentase puas (contoh: nilai 4 atau 5 dianggap puas dari skala 1-5)
         $totalPuas = $this->jawabanPenggunaModel
@@ -368,8 +349,9 @@ class AdminController extends BaseController
         
         $data['persentasePuasHasil'] = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
 
-        // Detail hasil per pertanyaan (contoh, untuk kuesioner pertama yang aktif)
-        $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first();
+        // Detail hasil per pertanyaan (untuk kuesioner pertama yang aktif, atau yang dipilih)
+        $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first(); // Ambil kuesioner aktif pertama
+        // Atau ambil berdasarkan filter jika ada: $this->request->getGet('kuesioner_id');
         $data['detailHasilPertanyaan'] = [];
         if ($activeKuesioner) {
             $pertanyaanList = $this->pertanyaanModel->getPertanyaanWithOpsi($activeKuesioner['id']);
@@ -413,11 +395,9 @@ class AdminController extends BaseController
         return view('admin/hasil/index', $data);
     }
 
-    // --- Export PDF ---
-    public function exportPdfHasil() {
-        // Ambil data yang akan diekspor (sama seperti di hasil() method, bisa difilter)
-        $kuesionerList = $this->kuesionerModel->findAll();
-        
+    // --- Export CSV ---
+    public function exportCsvHasil() {
+        // Logika pengambilan data serupa dengan method hasil()
         $totalRespondenHasil = $this->jawabanPenggunaModel->select('COUNT(DISTINCT ip_address) as total_ips')->get()->getRow('total_ips');
         $avgIkmResult = $this->jawabanPenggunaModel
                              ->select('AVG(opsi_jawaban.nilai) as average_score')
@@ -425,11 +405,11 @@ class AdminController extends BaseController
                              ->where('opsi_jawaban.nilai IS NOT NULL')
                              ->first();
         $ikmRataRataHasil = round($avgIkmResult['average_score'] ?? 0, 2);
-
+        
         $totalPuas = $this->jawabanPenggunaModel
                           ->select('COUNT(jawaban_pengguna.id) as count_puas')
                           ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
-                          ->where('opsi_jawaban.nilai >=', 4) 
+                          ->where('opsi_jawaban.nilai >=', 4)
                           ->countAllResults();
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
                                      ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
@@ -437,7 +417,6 @@ class AdminController extends BaseController
                                      ->countAllResults();
         $persentasePuasHasil = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
         
-        // Detail hasil per pertanyaan
         $detailHasilPertanyaan = [];
         $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first();
         if ($activeKuesioner) {
@@ -478,84 +457,51 @@ class AdminController extends BaseController
             }
         }
 
-        // Buat instance TCPDF
-        $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        // --- Persiapan Data CSV ---
+        $fileName = 'laporan_ikm_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
 
-        // Atur informasi dokumen
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Admin IKM');
-        $pdf->SetTitle('Laporan Hasil IKM');
-        $pdf->SetSubject('Laporan Indeks Kepuasan Masyarakat');
-        $pdf->SetKeywords('IKM, Laporan, Kepuasan Masyarakat');
+        $output = fopen('php://output', 'w');
 
-        // Hapus header/footer default
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
+        // Header CSV
+        fputcsv($output, ['Laporan Indeks Kepuasan Masyarakat']);
+        fputcsv($output, ['Tanggal Laporan: ' . date('d-m-Y H:i:s')]);
+        fputcsv($output, []); // Baris kosong
 
-        // Set margin
-        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-        $pdf->SetFont('helvetica', '', 10);
+        fputcsv($output, ['RINGKASAN UMUM']);
+        fputcsv($output, ['Total Responden', 'Nilai IKM Rata-rata (/5.0)', 'Persentase Puas (%)']);
+        fputcsv($output, [esc($totalRespondenHasil), number_format(esc($ikmRataRataHasil), 2), esc($persentasePuasHasil)]);
+        fputcsv($output, []);
 
-        // Tambah halaman baru
-        $pdf->AddPage();
-
-        // Konten HTML untuk PDF
-        $html = '
-        <h1 style="text-align: center; color: #007bff;">Laporan Hasil Indeks Kepuasan Masyarakat</h1>
-        <h3 style="text-align: center;">Per ' . date('d-m-Y H:i:s') . '</h3>
-        <br>
-        <table border="0" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-            <tr>
-                <td style="width: 50%;">
-                    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="background-color: #f0f8ff;"><strong>Ringkasan Umum:</strong></td></tr>
-                        <tr><td>Total Responden: <strong>' . esc($totalRespondenHasil) . '</strong></td></tr>
-                        <tr><td>Nilai IKM Rata-rata: <strong>' . number_format(esc($ikmRataRataHasil), 2) . ' / 5.0</strong></td></tr>
-                        <tr><td>Persentase Puas: <strong>' . esc($persentasePuasHasil) . '%</strong></td></tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-        <br><br>
-        ';
-        
-        $html .= '<h3 style="color: #007bff;">Detail Hasil Per Pertanyaan (Kuesioner Aktif):</h3>';
-        if (empty($detailHasilPertanyaan)) {
-            $html .= '<p>Tidak ada data pertanyaan untuk kuesioner aktif.</p>';
-        } else {
-            foreach ($detailHasilPertanyaan as $detail) {
-                $html .= '<p style="font-weight: bold; margin-bottom: 5px;">' . esc($detail['teks_pertanyaan']) . '</p>';
-                if ($detail['jenis_jawaban'] !== 'isian') {
-                    $html .= '<ul style="list-style-type: none; padding: 0;">';
-                    foreach ($detail['statistik'] as $stat) {
-                        if (isset($stat['opsi_teks'])) { // Cek jika ini bukan rata-rata nilai
-                            $html .= '<li>' . esc($stat['opsi_teks']) . ': ' . esc($stat['count']) . ' (' . esc($stat['percentage']) . '%)</li>';
-                        }
-                    }
-                    if (isset($detail['statistik']['rata_rata_nilai'])) {
-                        $html .= '<li style="font-weight: bold;">Rata-rata Nilai: ' . number_format(esc($detail['statistik']['rata_rata_nilai']), 2) . '</li>';
-                    }
-                    $html .= '</ul>';
-                } else {
-                    if (empty($detail['saran'])) {
-                        $html .= '<p style="font-style: italic; color: #666;">Belum ada saran untuk pertanyaan ini.</p>';
-                    } else {
-                        $html .= '<ul style="list-style-type: square; padding-left: 20px;">';
-                        foreach ($detail['saran'] as $saran) {
-                            $html .= '<li>' . esc($saran['teks']) . ' <span style="font-size: 8pt; color: #888;">(' . esc($saran['timestamp']) . ')</span></li>';
-                        }
-                        $html .= '</ul>';
+        fputcsv($output, ['DETAIL HASIL PER PERTANYAAN']);
+        foreach ($detailHasilPertanyaan as $detail) {
+            fputcsv($output, ['Pertanyaan:', esc($detail['teks_pertanyaan'])]);
+            if ($detail['jenis_jawaban'] !== 'isian') {
+                foreach ($detail['statistik'] as $stat) {
+                    if (isset($stat['opsi_teks'])) {
+                        fputcsv($output, [esc($stat['opsi_teks']), esc($stat['count']), esc($stat['percentage']) . '%']);
                     }
                 }
-                $html .= '<br>'; // Jarak antar pertanyaan
+                if (isset($detail['statistik']['rata_rata_nilai'])) {
+                    fputcsv($output, ['Rata-rata Nilai', number_format(esc($detail['statistik']['rata_rata_nilai']), 2)]);
+                }
+            } else {
+                fputcsv($output, ['Saran/Masukan:']);
+                if (empty($detail['saran'])) {
+                    fputcsv($output, ['- Tidak ada saran -']);
+                } else {
+                    foreach ($detail['saran'] as $saran) {
+                        fputcsv($output, ['"', esc($saran['teks']), '"', esc($saran['timestamp'])]);
+                    }
+                }
             }
+            fputcsv($output, []); // Baris kosong antar pertanyaan
         }
-        
-        $pdf->writeHTML($html, true, false, true, false, '');
 
-        // Output PDF
-        $fileName = 'laporan_ikm_' . date('Ymd_His') . '.pdf';
-        $pdf->Output($fileName, 'D'); // 'D' untuk download
+        fclose($output);
+        exit(); // Penting untuk menghentikan eksekusi setelah output CSV
     }
 }
