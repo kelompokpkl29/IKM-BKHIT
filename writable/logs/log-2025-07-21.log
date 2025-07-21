@@ -91,3 +91,109 @@ in SYSTEMPATH/Validation/Validation.php on line 345.
  8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
  9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
 10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-07-21 04:05:18 --> CodeIgniter\Validation\Exceptions\ValidationException: "array" is not a valid rule.
+[Method: POST, Route: admin/pertanyaan/store]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('array')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('opsi_teks', 'opsi_teks', [...], [...], [...], 'opsi_teks')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AdminController.php(142): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AdminController->storePertanyaan()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AdminController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-21 04:05:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:05:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:05:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-21 04:05:32 --> CodeIgniter\Validation\Exceptions\ValidationException: "array" is not a valid rule.
+[Method: POST, Route: admin/pertanyaan/update/1]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('array')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('opsi_teks', 'opsi_teks', [...], [...], [...], 'opsi_teks')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AdminController.php(207): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AdminController->updatePertanyaan('1')
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AdminController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-21 04:08:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-21 04:08:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-07-21 04:09:20 --> mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_' at line 1 in /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/MySQLi/Connection.php:327
+Stack trace:
+#0 /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/MySQLi/Connection.php(327): mysqli->query('INSERT INTO `ja...', 0)
+#1 /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `ja...')
+#2 /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `ja...')
+#3 /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `ja...', NULL, false)
+#4 /Applications/MAMP/htdocs/IKM-BKHIT/system/Database/BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+#5 /Applications/MAMP/htdocs/IKM-BKHIT/system/Model.php(428): CodeIgniter\Database\BaseBuilder->insertBatch(Array, NULL, 100)
+#6 /Applications/MAMP/htdocs/IKM-BKHIT/system/BaseModel.php(963): CodeIgniter\Model->doInsertBatch(Array, NULL, 100, false)
+#7 /Applications/MAMP/htdocs/IKM-BKHIT/app/Controllers/KuesionerController.php(73): CodeIgniter\BaseModel->insertBatch(Array)
+#8 /Applications/MAMP/htdocs/IKM-BKHIT/system/CodeIgniter.php(933): App\Controllers\KuesionerController->submit()
+#9 /Applications/MAMP/htdocs/IKM-BKHIT/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\KuesionerController))
+#10 /Applications/MAMP/htdocs/IKM-BKHIT/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 /Applications/MAMP/htdocs/IKM-BKHIT/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#12 /Applications/MAMP/htdocs/IKM-BKHIT/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 /Applications/MAMP/htdocs/IKM-BKHIT/public/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 {main}
+CRITICAL - 2025-07-21 04:09:20 --> CodeIgniter\Database\Exceptions\DatabaseException: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_' at line 1
+[Method: POST, Route: kuesioner/submit]
+in SYSTEMPATH/Database/BaseConnection.php on line 692.
+ 1 SYSTEMPATH/Database/BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')', null, false)
+ 2 SYSTEMPATH/Database/BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+ 3 SYSTEMPATH/Model.php(428): CodeIgniter\Database\BaseBuilder->insertBatch([...], null, 100)
+ 4 SYSTEMPATH/BaseModel.php(963): CodeIgniter\Model->doInsertBatch([...], null, 100, false)
+ 5 APPPATH/Controllers/KuesionerController.php(73): CodeIgniter\BaseModel->insertBatch([...])
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\KuesionerController->submit()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\KuesionerController))
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-07-21 04:09:20 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_' at line 1
+in SYSTEMPATH/Database/MySQLi/Connection.php on line 332.
+ 1 SYSTEMPATH/Database/BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')')
+ 2 SYSTEMPATH/Database/BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')')
+ 3 SYSTEMPATH/Database/BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')', null, false)
+ 4 SYSTEMPATH/Database/BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+ 5 SYSTEMPATH/Model.php(428): CodeIgniter\Database\BaseBuilder->insertBatch([...], null, 100)
+ 6 SYSTEMPATH/BaseModel.php(963): CodeIgniter\Model->doInsertBatch([...], null, 100, false)
+ 7 APPPATH/Controllers/KuesionerController.php(73): CodeIgniter\BaseModel->insertBatch([...])
+ 8 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\KuesionerController->submit()
+ 9 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\KuesionerController))
+10 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-07-21 04:09:20 --> [Caused by] mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_' at line 1
+in SYSTEMPATH/Database/MySQLi/Connection.php on line 327.
+ 1 SYSTEMPATH/Database/MySQLi/Connection.php(327): mysqli->query('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')', 0)
+ 2 SYSTEMPATH/Database/BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')')
+ 3 SYSTEMPATH/Database/BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')')
+ 4 SYSTEMPATH/Database/BaseBuilder.php(1841): CodeIgniter\Database\BaseConnection->query('INSERT INTO `jawaban_pengguna` (0, `ip_address`, `jawaban_teks`, `kuesioner_id`, `opsi_jawaban_id`, `pertanyaan_id`, `timestamp_isi`)
+VALUES (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'1\',\'1\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',NULL,\'1\',\'8\',\'2\',\'2025-07-21 04:09:20\'), (\'2025-07-21 04:09:20\',\'::1\',\'BLELELLELE\',\'1\',NULL,\'3\',\'2025-07-21 04:09:20\')', null, false)
+ 5 SYSTEMPATH/Database/BaseBuilder.php(2230): CodeIgniter\Database\BaseBuilder->batchExecute('_insertBatch', 100)
+ 6 SYSTEMPATH/Model.php(428): CodeIgniter\Database\BaseBuilder->insertBatch([...], null, 100)
+ 7 SYSTEMPATH/BaseModel.php(963): CodeIgniter\Model->doInsertBatch([...], null, 100, false)
+ 8 APPPATH/Controllers/KuesionerController.php(73): CodeIgniter\BaseModel->insertBatch([...])
+ 9 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\KuesionerController->submit()
+10 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\KuesionerController))
+11 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
