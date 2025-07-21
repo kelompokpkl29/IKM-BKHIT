@@ -7,7 +7,12 @@
 <p class="lead">Lihat rekapitulasi data dan analisis hasil kuesioner.</p>
 
 <?php
-$kuesionerList = $kuesionerList ?? []; // Data dari controller
+// Data dari controller
+$kuesionerList = $kuesionerList ?? [];
+$totalRespondenHasil = $totalRespondenHasil ?? 0;
+$ikmRataRataHasil = $ikmRataRataHasil ?? 0.0;
+$persentasePuasHasil = $persentasePuasHasil ?? 0.0;
+$detailHasilPertanyaan = $detailHasilPertanyaan ?? [];
 ?>
 
 <div class="card shadow mb-4">
@@ -50,42 +55,54 @@ $kuesionerList = $kuesionerList ?? []; // Data dari controller
         <div class="row text-center mb-4">
             <div class="col-md-4">
                 <h3>Total Responden</h3>
-                <p class="display-5 text-primary">850</p>
+                <p class="display-5 text-primary"><?= esc($totalRespondenHasil) ?></p>
             </div>
             <div class="col-md-4">
                 <h3>Nilai IKM Rata-rata</h3>
-                <p class="display-5 text-success">3.75 <small>/ 4.0</small></p>
+                <p class="display-5 text-success"><?= number_format(esc($ikmRataRataHasil), 2) ?> <small>/ 5.0</small></p>
             </div>
             <div class="col-md-4">
                 <h3>Persentase Puas</h3>
-                <p class="display-5 text-info">88%</p>
+                <p class="display-5 text-info"><?= esc($persentasePuasHasil) ?>%</p>
             </div>
         </div>
         <hr>
-        <h5 class="mb-3">Detail Hasil Per Pertanyaan (Contoh)</h5>
-        <ul class="list-group mb-3">
-            <li class="list-group-item">
-                <strong>Bagaimana tingkat kemudahan dalam mengakses layanan kami?</strong>
-                <ul class="list-group list-group-flush mt-2">
-                    <li class="list-group-item">Sangat Mudah: 300 (35%)</li>
-                    <li class="list-group-item">Mudah: 400 (47%)</li>
-                    <li class="list-group-item">Cukup Mudah: 100 (12%)</li>
-                    <li class="list-group-item">Sulit: 30 (4%)</li>
-                    <li class="list-group-item">Sangat Sulit: 20 (2%)</li>
-                    <li class="list-group-item">Rata-rata Nilai: 3.9</li>
-                </ul>
-            </li>
-            <li class="list-group-item mt-3">
-                <strong>Sebutkan saran atau masukan Anda untuk peningkatan layanan kami:</strong>
-                <p class="text-muted small mt-2">
-                    "Perlu ditingkatkan kecepatan dalam pengurusan dokumen." (12 Mei 2025) <br>
-                    "Petugas sangat ramah dan membantu." (10 Mei 2025) <br>
-                    "Website sering error saat jam sibuk." (08 Mei 2025)
-                </p>
-                <button class="btn btn-sm btn-outline-info">Lihat Semua Saran</button>
-            </li>
-        </ul>
-        <button class="btn btn-success mt-3">Export Data ke CSV</button>
+        <h5 class="mb-3">Detail Hasil Per Pertanyaan</h5>
+        <?php if (empty($detailHasilPertanyaan)): ?>
+            <p class="text-muted">Tidak ada data pertanyaan untuk kuesioner aktif yang ditampilkan.</p>
+        <?php else: ?>
+            <ul class="list-group mb-3">
+                <?php foreach ($detailHasilPertanyaan as $detail): ?>
+                    <li class="list-group-item">
+                        <strong><?= esc($detail['teks_pertanyaan']) ?></strong>
+                        <?php if ($detail['jenis_jawaban'] !== 'isian'): ?>
+                            <ul class="list-group list-group-flush mt-2">
+                                <?php foreach ($detail['statistik'] as $stat): ?>
+                                    <?php if (isset($stat['opsi_teks'])): ?>
+                                        <li class="list-group-item"><?= esc($stat['opsi_teks']) ?>: <?= esc($stat['count']) ?> (<?= esc($stat['percentage']) ?>%)</li>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                                <?php if (isset($detail['statistik']['rata_rata_nilai'])): ?>
+                                    <li class="list-group-item font-weight-bold">Rata-rata Nilai: <?= number_format(esc($detail['statistik']['rata_rata_nilai']), 2) ?></li>
+                                <?php endif; ?>
+                            </ul>
+                        <?php else: ?>
+                            <?php if (empty($detail['saran'])): ?>
+                                <p class="text-muted small mt-2">Belum ada saran untuk pertanyaan ini.</p>
+                            <?php else: ?>
+                                <ul class="list-group list-group-flush mt-2">
+                                    <?php foreach ($detail['saran'] as $saran): ?>
+                                        <li class="list-group-item"><?= esc($saran['teks']) ?> <span class="text-muted" style="font-size: 0.8em;">(<?= esc($saran['timestamp']) ?>)</span></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <a href="<?= base_url('admin/exportPdfHasil') ?>" class="btn btn-success mt-3" target="_blank">Export Data ke PDF</a>
     </div>
 </div>
 <?= $this->endSection() ?>
