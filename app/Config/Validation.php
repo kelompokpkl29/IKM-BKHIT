@@ -3,15 +3,10 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
-// Sesuaikan import ini dengan versi CodeIgniter Anda (StrictRules atau tidak)
-// Berdasarkan screenshot Anda sebelumnya, Anda menggunakan StrictRules.
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
-
-// Untuk aturan kustom seperti validateUser dan check_old_password
-// Pastikan Anda juga memiliki Models/UserModel.php
 use App\Models\UserModel; 
 
 class Validation extends BaseConfig
