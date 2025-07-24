@@ -99,6 +99,7 @@ a:hover {
 /* --- Specific Styles for Admin Dashboard & Sidebar --- */
 #wrapper {
     display: flex;
+    min-height: 100vh;
 }
 
 #sidebar-wrapper {
@@ -140,6 +141,7 @@ a:hover {
 
 #page-content-wrapper {
     min-width: 100vw;
+    flex-grow: 1;
 }
 
 /* Toggle behavior for sidebar */

@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 pertanyaanItems[i].style.display = 'none';
             }
         }
-        // Tampilkan pertanyaan pertama
         if (pertanyaanItems[0]) {
             pertanyaanItems[0].style.display = 'block';
         }

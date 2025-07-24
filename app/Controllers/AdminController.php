@@ -28,40 +28,38 @@ class AdminController extends BaseController
         $data['totalKuesioner'] = $this->kuesionerModel->countAllResults();
         $data['activeKuesioner'] = $this->kuesionerModel->where('is_active', 1)->countAllResults();
         
+        // Menghitung total responden unik berdasarkan IP address
         $data['totalResponden'] = $this->jawabanPenggunaModel
                                      ->select('COUNT(DISTINCT ip_address) as total_ips')
                                      ->get()
                                      ->getRow('total_ips');
 
+        // Perhitungan IKM Rata-rata
+        // Rumus IKM sederhana: (Total Nilai Jawaban Opsi / Total Jawaban Opsi)
         $avgScoreResult = $this->jawabanPenggunaModel
                                  ->select('AVG(opsi_jawaban.nilai) as average_score')
                                  ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                                 ->where('opsi_jawaban.nilai IS NOT NULL')
+                                 ->where('opsi_jawaban.nilai IS NOT NULL') // Hanya jawaban yang memiliki nilai (skala)
                                  ->first();
 
         $data['ikmAverage'] = $avgScoreResult['average_score'] ? round($avgScoreResult['average_score'], 2) : 0;
-        if ($data['ikmAverage'] > 5.0) $data['ikmAverage'] = 5.0;
+        if ($data['ikmAverage'] > 5.0) $data['ikmAverage'] = 5.0; // Batasi maksimal 5
 
         $data['recentKuesioner'] = $this->kuesionerModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
 
         return view('admin/dashboard', $data);
     }
 
+    // --- Kuesioner Management ---
     public function kuesioner() {
         $data['kuesioner'] = $this->kuesionerModel->findAll();
         return view('admin/kuesioner/index', $data);
     }
     public function createKuesioner() { return view('admin/kuesioner/create'); }
     public function storeKuesioner() {
-        // Validasi dasar (bisa diperluas jika diperlukan)
-        $rules = [
-            'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
-            'deskripsi'      => 'permit_empty',
-        ];
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
-
+        // --- VALIDASI DIHILANGKAN ---
+        // $rules = [...]; if (!$this->validate($rules)) { ... }
+        
         $data = [
             'nama_kuesioner' => $this->request->getPost('nama_kuesioner'),
             'deskripsi'      => $this->request->getPost('deskripsi'),
@@ -79,13 +77,8 @@ class AdminController extends BaseController
         return view('admin/kuesioner/edit', $data);
     }
     public function updateKuesioner($id) {
-        $rules = [
-            'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
-            'deskripsi'      => 'permit_empty',
-        ];
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
+        // --- VALIDASI DIHILANGKAN ---
+        // $rules = [...]; if (!$this->validate($rules)) { ... }
 
         $data = [
             'nama_kuesioner' => $this->request->getPost('nama_kuesioner'),
@@ -106,6 +99,7 @@ class AdminController extends BaseController
         }
     }
 
+    // --- Pertanyaan Management ---
     public function pertanyaan($kuesionerId) {
         $data['kuesioner'] = $this->kuesionerModel->find($kuesionerId);
         if (empty($data['kuesioner'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.'); }
@@ -119,24 +113,10 @@ class AdminController extends BaseController
     }
     public function storePertanyaan() {
         $kuesionerId = $this->request->getPost('kuesioner_id');
-        $rules = [
-            'kuesioner_id'    => 'required|is_natural_no_zero',
-            'teks_pertanyaan' => 'required|min_length[5]',
-            'jenis_jawaban'   => 'required|in_list[skala,pilihan_ganda,isian]',
-            'urutan'          => 'required|is_natural_no_zero',
-        ];
-        $jenisJawaban = $this->request->getPost('jenis_jawaban');
-        if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
-            $rules['opsi_teks'] = 'required|array';
-            $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
-            if ($jenisJawaban === 'skala') {
-                $rules['opsi_nilai'] = 'required|array';
-                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
-            }
-        }
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
+        // --- VALIDASI DIHILANGKAN ---
+        /*
+        $rules = [ ... ]; if (!$this->validate($rules)) { ... }
+        */
 
         $pertanyaanData = [
             'kuesioner_id'    => $kuesionerId,
@@ -147,7 +127,8 @@ class AdminController extends BaseController
         
         $pertanyaanId = $this->pertanyaanModel->insert($pertanyaanData); 
 
-        if ($pertanyaanId) {
+        if ($pertanyaanId) { // Ini akan dieksekusi hanya jika insert berhasil
+            $jenisJawaban = $this->request->getPost('jenis_jawaban'); // Pastikan didefinisikan dari POST
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
                 $opsiTeks = $this->request->getPost('opsi_teks');
                 $opsiNilai = $this->request->getPost('opsi_nilai');
@@ -181,31 +162,15 @@ class AdminController extends BaseController
         $pertanyaan = $this->pertanyaanModel->find($id);
         if (empty($pertanyaan)) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.'); }
 
-        $rules = [
-            'teks_pertanyaan' => 'required|min_length[5]',
-            'jenis_jawaban'   => 'required|in_list[skala,pilihan_ganda,isian]',
-            'urutan'          => 'required|is_natural_no_zero',
-        ];
-        $jenisJawaban = $this->request->getPost('jenis_jawaban');
-        if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
-            $rules['opsi_teks'] = 'required|array';
-            $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
-            if ($jenisJawaban === 'skala') {
-                $rules['opsi_nilai'] = 'required|array';
-                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
-            }
-        }
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
-
+        // --- VALIDASI DIHILANGKAN ---
+        
         $pertanyaanData = [
             'teks_pertanyaan' => $this->request->getPost('teks_pertanyaan'),
             'jenis_jawaban'   => $this->request->getPost('jenis_jawaban'),
             'urutan'          => $this->request->getPost('urutan'),
         ];
         if ($this->pertanyaanModel->update($id, $pertanyaanData)) {
-            // Hapus semua opsi lama dan masukkan yang baru (sederhana untuk contoh ini)
+            $jenisJawaban = $this->request->getPost('jenis_jawaban'); // Pastikan didefinisikan di sini
             $this->opsiJawabanModel->where('pertanyaan_id', $id)->delete();
 
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
@@ -250,36 +215,7 @@ class AdminController extends BaseController
         $userId = session()->get('user_id');
         $user = $this->userModel->find($userId);
 
-        $rules = [
-            'username' => 'required|min_length[3]|max_length[255]',
-            'email'    => 'required|valid_email|max_length[255]',
-        ];
-        // Validasi unik untuk username dan email jika diubah
-        if ($user && $this->request->getPost('username') !== $user['username']) {
-            $rules['username'] .= '|is_unique[users.username,id,' . $userId . ']';
-        }
-        if ($user && $this->request->getPost('email') !== $user['email']) {
-            $rules['email'] .= '|is_unique[users.email,id,' . $userId . ']';
-        }
-
-        // Jika ada input password lama/baru, tambahkan aturan validasi password
-        if ($this->request->getPost('old_password') || $this->request->getPost('new_password')) {
-            $rules['old_password'] = [
-                'rules' => 'required|check_old_password', 
-                'errors' => ['required' => 'Password lama wajib diisi untuk mengubah password.']
-            ];
-            $rules['new_password'] = 'required|min_length[6]|matches[confirm_new_password]';
-            $rules['confirm_new_password'] = 'required';
-        }
-
-        if (!$this->validate($rules, [ 
-            'old_password' => [
-                'check_old_password' => 'Password lama salah.'
-            ]
-        ])) {
-            return redirect()->back()->withInput()->with('validation', $this->validator);
-        }
-
+        // --- VALIDASI DIHILANGKAN ---
         $dataToUpdate = [
             'username' => $this->request->getPost('username'),
             'email'    => $this->request->getPost('email'),
@@ -298,12 +234,13 @@ class AdminController extends BaseController
         }
     }
 
-    // Aturan validasi kustom check_old_password (perlu di-enable di app/Config/Validation.php)
+    // Aturan validasi kustom check_old_password (tetap ada karena model memanggilnya, namun tidak terpicu jika validasi dinonaktifkan di atas)
     public function check_old_password(string $inputPassword, string $field, array $data, ?string &$error = null): bool
     {
+        // Ini hanya akan terpicu jika ada aturan validasi yang memanggilnya,
+        // yang saat ini dinonaktifkan di updateProfile.
         $userId = session()->get('user_id');
         $user = $this->userModel->find($userId);
-
         if (!$user) {
             $error = 'Pengguna tidak ditemukan.';
             return false;
@@ -324,7 +261,6 @@ class AdminController extends BaseController
         
         $data['kuesionerList'] = $kuesionerList; // Untuk dropdown filter
 
-        // Contoh perhitungan ringkasan (ini bisa disempurnakan dengan filter tanggal/kuesioner)
         $totalRespondenHasil = $this->jawabanPenggunaModel->select('COUNT(DISTINCT ip_address) as total_ips')->get()->getRow('total_ips');
         $data['totalRespondenHasil'] = $totalRespondenHasil;
 
@@ -344,14 +280,13 @@ class AdminController extends BaseController
                           ->countAllResults();
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
                                      ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
-                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id') 
                                      ->countAllResults();
         
         $data['persentasePuasHasil'] = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
 
         // Detail hasil per pertanyaan (untuk kuesioner pertama yang aktif, atau yang dipilih)
         $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first(); // Ambil kuesioner aktif pertama
-        // Atau ambil berdasarkan filter jika ada: $this->request->getGet('kuesioner_id');
         $data['detailHasilPertanyaan'] = [];
         if ($activeKuesioner) {
             $pertanyaanList = $this->pertanyaanModel->getPertanyaanWithOpsi($activeKuesioner['id']);
@@ -374,7 +309,6 @@ class AdminController extends BaseController
                             'percentage'=> $percentage
                         ];
                     }
-                    // Rata-rata nilai untuk pertanyaan skala
                     if ($pertanyaan['jenis_jawaban'] === 'skala') {
                         $avgNilai = $this->jawabanPenggunaModel
                                          ->select('AVG(opsi_jawaban.nilai) as avg_score')
@@ -384,7 +318,7 @@ class AdminController extends BaseController
                                          ->first();
                         $detail['statistik']['rata_rata_nilai'] = round($avgNilai['avg_score'] ?? 0, 2);
                     }
-                } else { // Isian
+                } else {
                     $saran = $this->jawabanPenggunaModel->where('pertanyaan_id', $pertanyaan['id'])->where('jawaban_teks IS NOT NULL')->findAll();
                     $detail['saran'] = array_map(function($j){ return ['teks' => $j['jawaban_teks'], 'timestamp' => $j['timestamp_isi']]; }, $saran);
                 }
@@ -413,7 +347,7 @@ class AdminController extends BaseController
                           ->countAllResults();
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
                                      ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
-                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id') 
                                      ->countAllResults();
         $persentasePuasHasil = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
         
@@ -502,6 +436,6 @@ class AdminController extends BaseController
         }
 
         fclose($output);
-        exit(); // Penting untuk menghentikan eksekusi setelah output CSV
+        exit(); 
     }
 }
