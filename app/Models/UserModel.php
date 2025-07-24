@@ -10,7 +10,7 @@ class UserModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    // Callback untuk hashing password sebelum insert/update
+    // Callback untuk hashing password sebelum insert/update (PENTING untuk keamanan)
     protected $beforeInsert = ['hashPassword'];
     protected $beforeUpdate = ['hashPassword'];
     protected function hashPassword(array $data)

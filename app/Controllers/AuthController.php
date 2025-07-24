@@ -8,7 +8,7 @@ class AuthController extends BaseController
     public function __construct()
     {
         $this->userModel = new UserModel();
-        helper(['form', 'url']);
+        helper(['form', 'url', 'session']); 
     }
 
     public function login()
