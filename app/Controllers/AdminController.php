@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\KuesionerModel;
 use App\Models\PertanyaanModel;
 use App\Models\OpsiJawabanModel;
@@ -30,29 +32,26 @@ class AdminController extends BaseController
         helper(['form', 'url', 'session']);
     }
 
-    public function dashboard() {
+    public function dashboard()
+    {
         $data['totalKuesioner'] = $this->kuesionerModel->countAllResults();
         $data['activeKuesioner'] = $this->kuesionerModel->where('is_active', 1)->countAllResults();
 
-        // Mengambil total responden dari tabel respondents
         $data['totalResponden'] = $this->respondentsModel->countAllResults();
 
-        // Perhitungan IKM Rata-rata dari jawaban granular
-        // Mengambil semua jawaban dengan jenis 'skala' yang memiliki nilai
         $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
-                                            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
-                                            ->where('pertanyaan.jenis_jawaban', 'skala')
-                                            ->countAllResults();
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->countAllResults();
 
-        // Menjumlahkan semua nilai dari jawaban 'skala'
         $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
-                                       ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
-                                       ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                                       ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
-                                       ->where('pertanyaan.jenis_jawaban', 'skala')
-                                       ->where('opsi_jawaban.nilai IS NOT NULL')
-                                       ->get()
-                                       ->getRow('sum_nilai');
+            ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->where('opsi_jawaban.nilai IS NOT NULL')
+            ->get()
+            ->getRow('sum_nilai');
 
         $ikmRataRataHasil = 0;
         if ($totalJawabanSkalaDiberikan > 0) {
@@ -66,12 +65,17 @@ class AdminController extends BaseController
         return view('admin/dashboard', $data);
     }
 
-    public function kuesioner() {
+    public function kuesioner()
+    {
         $data['kuesioner'] = $this->kuesionerModel->findAll();
         return view('admin/kuesioner/index', $data);
     }
-    public function createKuesioner() { return view('admin/kuesioner/create'); }
-    public function storeKuesioner() {
+    public function createKuesioner()
+    {
+        return view('admin/kuesioner/create');
+    }
+    public function storeKuesioner()
+    {
         // --- VALIDASI SEDERHANA ---
         $rules = [
             'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
@@ -93,12 +97,16 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan kuesioner.');
         }
     }
-    public function editKuesioner($id) {
+    public function editKuesioner($id)
+    {
         $data['kuesioner'] = $this->kuesionerModel->find($id);
-        if (empty($data['kuesioner'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.'); }
+        if (empty($data['kuesioner'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.');
+        }
         return view('admin/kuesioner/edit', $data);
     }
-    public function updateKuesioner($id) {
+    public function updateKuesioner($id)
+    {
         // --- VALIDASI SEDERHANA ---
         $rules = [
             'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
@@ -120,7 +128,8 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui kuesioner.');
         }
     }
-    public function deleteKuesioner($id) {
+    public function deleteKuesioner($id)
+    {
         if ($this->kuesionerModel->delete($id)) {
             return redirect()->to(base_url('admin/kuesioner'))->with('success', 'Kuesioner berhasil dihapus! (Termasuk pertanyaan & jawaban terkait).');
         } else {
@@ -128,18 +137,25 @@ class AdminController extends BaseController
         }
     }
 
-    public function pertanyaan($kuesionerId) {
+    public function pertanyaan($kuesionerId)
+    {
         $data['kuesioner'] = $this->kuesionerModel->find($kuesionerId);
-        if (empty($data['kuesioner'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.'); }
+        if (empty($data['kuesioner'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.');
+        }
         $data['pertanyaan'] = $this->pertanyaanModel->getPertanyaanWithOpsi($kuesionerId);
         return view('admin/pertanyaan/index', $data);
     }
-    public function createPertanyaan($kuesionerId) {
+    public function createPertanyaan($kuesionerId)
+    {
         $data['kuesioner'] = $this->kuesionerModel->find($kuesionerId);
-        if (empty($data['kuesioner'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.'); }
+        if (empty($data['kuesioner'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan.');
+        }
         return view('admin/pertanyaan/create', $data);
     }
-    public function storePertanyaan() {
+    public function storePertanyaan()
+    {
         // Ambil kuesioner_id dari POST request
         $kuesionerId = $this->request->getPost('kuesioner_id');
 
@@ -170,8 +186,8 @@ class AdminController extends BaseController
             'jenis_jawaban'   => $this->request->getPost('jenis_jawaban'),
             'urutan'          => $this->request->getPost('urutan'),
         ];
-        
-        $pertanyaanId = $this->pertanyaanModel->insert($pertanyaanData); 
+
+        $pertanyaanId = $this->pertanyaanModel->insert($pertanyaanData);
 
         if ($pertanyaanId) {
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
@@ -182,13 +198,15 @@ class AdminController extends BaseController
                     foreach ($opsiTeks as $key => $teks) {
                         if (!empty($teks)) {
                             $batchOpsi[] = [
-                                'pertanyaan_id' => $pertanyaanId, 
+                                'pertanyaan_id' => $pertanyaanId,
                                 'opsi_teks'     => trim($teks),
                                 'nilai'         => ($jenisJawaban === 'skala' && isset($opsiNilai[$key])) ? (int)$opsiNilai[$key] : null,
                             ];
                         }
                     }
-                    if (!empty($batchOpsi)) { $this->opsiJawabanModel->insertBatch($batchOpsi); }
+                    if (!empty($batchOpsi)) {
+                        $this->opsiJawabanModel->insertBatch($batchOpsi);
+                    }
                 }
             }
             return redirect()->to(base_url('admin/pertanyaan/' . $kuesionerId))->with('success', 'Pertanyaan berhasil ditambahkan!');
@@ -196,16 +214,22 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal menambahkan pertanyaan.');
         }
     }
-    public function editPertanyaan($id) {
+    public function editPertanyaan($id)
+    {
         $data['pertanyaan'] = $this->pertanyaanModel->find($id);
-        if (empty($data['pertanyaan'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.'); }
+        if (empty($data['pertanyaan'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.');
+        }
         $data['kuesioner'] = $this->kuesionerModel->find($data['pertanyaan']['kuesioner_id']);
         $data['opsiJawaban'] = $this->opsiJawabanModel->where('pertanyaan_id', $id)->findAll();
         return view('admin/pertanyaan/edit', $data);
     }
-    public function updatePertanyaan($id) {
+    public function updatePertanyaan($id)
+    {
         $pertanyaan = $this->pertanyaanModel->find($id);
-        if (empty($pertanyaan)) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.'); }
+        if (empty($pertanyaan)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.');
+        }
 
         // --- VALIDASI SEDERHANA ---
         $rules = [
@@ -250,7 +274,9 @@ class AdminController extends BaseController
                             ];
                         }
                     }
-                    if (!empty($batchOpsi)) { $this->opsiJawabanModel->insertBatch($batchOpsi); }
+                    if (!empty($batchOpsi)) {
+                        $this->opsiJawabanModel->insertBatch($batchOpsi);
+                    }
                 }
             }
             return redirect()->to(base_url('admin/pertanyaan/' . $pertanyaan['kuesioner_id']))->with('success', 'Pertanyaan berhasil diperbarui!');
@@ -258,9 +284,12 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui pertanyaan.');
         }
     }
-    public function deletePertanyaan($id) {
+    public function deletePertanyaan($id)
+    {
         $pertanyaan = $this->pertanyaanModel->find($id);
-        if (empty($pertanyaan)) { return redirect()->back()->with('error', 'Pertanyaan tidak ditemukan.'); }
+        if (empty($pertanyaan)) {
+            return redirect()->back()->with('error', 'Pertanyaan tidak ditemukan.');
+        }
         if ($this->pertanyaanModel->delete($id)) {
             return redirect()->to(base_url('admin/pertanyaan/' . $pertanyaan['kuesioner_id']))->with('success', 'Pertanyaan berhasil dihapus! (Termasuk opsi & jawaban terkait).');
         } else {
@@ -269,12 +298,16 @@ class AdminController extends BaseController
     }
 
     // --- Admin Profile Management ---
-    public function profile() {
+    public function profile()
+    {
         $data['user'] = $this->userModel->find(session()->get('user_id'));
-        if (empty($data['user'])) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Pengguna tidak ditemukan.'); }
+        if (empty($data['user'])) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Pengguna tidak ditemukan.');
+        }
         return view('admin/profile/index', $data);
     }
-    public function updateProfile() {
+    public function updateProfile()
+    {
         $userId = session()->get('user_id');
         $user = $this->userModel->find($userId);
 
@@ -310,6 +343,7 @@ class AdminController extends BaseController
             $dataToUpdate['password'] = password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT);
         }
         if ($this->userModel->update($userId, $dataToUpdate)) {
+            // Perbarui sesi dengan data terbaru jika username/email berubah
             session()->set([
                 'username' => $dataToUpdate['username'],
                 'email'    => $dataToUpdate['email']
@@ -322,7 +356,8 @@ class AdminController extends BaseController
 
 
     // --- Hasil IKM ---
-    public function hasil() {
+    public function hasil()
+    {
         $kuesionerList = $this->kuesionerModel->findAll();
 
         $data['kuesionerList'] = $kuesionerList; // Untuk dropdown filter
@@ -386,21 +421,23 @@ class AdminController extends BaseController
                         $detail['statistik'][] = [
                             'opsi_teks' => $opsi['opsi_teks'],
                             'count'     => $count,
-                            'percentage'=> $percentage
+                            'percentage' => $percentage
                         ];
                     }
                     if ($pertanyaan['jenis_jawaban'] === 'skala') {
                         $avgNilai = $this->jawabanPenggunaModel
-                                         ->select('AVG(opsi_jawaban.nilai) as avg_score')
-                                         ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                                         ->where('jawaban_pengguna.pertanyaan_id', $pertanyaan['id'])
-                                         ->where('opsi_jawaban.nilai IS NOT NULL')
-                                         ->first();
+                            ->select('AVG(opsi_jawaban.nilai) as avg_score')
+                            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+                            ->where('jawaban_pengguna.pertanyaan_id', $pertanyaan['id'])
+                            ->where('opsi_jawaban.nilai IS NOT NULL')
+                            ->first();
                         $detail['statistik']['rata_rata_nilai'] = round($avgNilai['avg_score'] ?? 0, 2);
                     }
                 } else {
                     $saran = $this->jawabanPenggunaModel->where('pertanyaan_id', $pertanyaan['id'])->where('jawaban_teks IS NOT NULL')->findAll();
-                    $detail['saran'] = array_map(function($j){ return ['teks' => $j['jawaban_teks'], 'timestamp' => $j['timestamp_isi']]; }, $saran);
+                    $detail['saran'] = array_map(function ($j) {
+                        return ['teks' => $j['jawaban_teks'], 'timestamp' => $j['timestamp_isi']];
+                    }, $saran);
                 }
                 $data['detailHasilPertanyaan'][] = $detail;
             }
@@ -414,7 +451,8 @@ class AdminController extends BaseController
         return view('admin/hasil/index', $data);
     }
 
-    public function exportCsvHasil() {
+    public function exportCsvHasil()
+    {
         // Header untuk download CSV
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=hasil_ikm_' . date('Y-m-d') . '.csv');
@@ -436,13 +474,13 @@ class AdminController extends BaseController
 
         $totalSkalaPertanyaan = $this->pertanyaanModel->where('jenis_jawaban', 'skala')->countAllResults();
         $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
-                                            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
-                                            ->where('pertanyaan.jenis_jawaban', 'skala')
-                                            ->countAllResults();
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->countAllResults();
 
         $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
             ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
-            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
             ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
             ->where('pertanyaan.jenis_jawaban', 'skala')
             ->where('opsi_jawaban.nilai IS NOT NULL')
@@ -498,15 +536,13 @@ class AdminController extends BaseController
                             $percentage . '%'
                         ]);
                     }
-
-                    // Jika pertanyaan skala, tambahkan rata-rata nilai
                     if ($pertanyaan['jenis_jawaban'] === 'skala') {
                         $avgNilai = $this->jawabanPenggunaModel
-                                         ->select('AVG(opsi_jawaban.nilai) as avg_score')
-                                         ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                                         ->where('jawaban_pengguna.pertanyaan_id', $pertanyaan['id'])
-                                         ->where('opsi_jawaban.nilai IS NOT NULL')
-                                         ->first();
+                            ->select('AVG(opsi_jawaban.nilai) as avg_score')
+                            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+                            ->where('jawaban_pengguna.pertanyaan_id', $pertanyaan['id'])
+                            ->where('opsi_jawaban.nilai IS NOT NULL')
+                            ->first();
                         fputcsv($output, [
                             '',
                             '',

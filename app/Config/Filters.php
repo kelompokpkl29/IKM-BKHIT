@@ -9,7 +9,7 @@ use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
 
-use App\Filters\AuthAdminFilter; // Penting: Import filter autentikasi admin Anda
+use App\Filters\AuthAdminFilter; 
 
 class Filters extends BaseFilters
 {
@@ -19,7 +19,7 @@ class Filters extends BaseFilters
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'authAdmin'     => AuthAdminFilter::class, // Alias untuk filter autentikasi admin Anda
+        'authAdmin'     => AuthAdminFilter::class, 
     ];
 
     public array $required = [

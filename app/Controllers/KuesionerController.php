@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\KuesionerModel;
 use App\Models\PertanyaanModel;
 use App\Models\OpsiJawabanModel;
 use App\Models\JawabanPenggunaModel;
-use App\Models\RespondentsModel; 
+use App\Models\RespondentsModel;
 
 class KuesionerController extends BaseController
 {
@@ -12,7 +14,7 @@ class KuesionerController extends BaseController
     protected $pertanyaanModel;
     protected $opsiJawabanModel;
     protected $jawabanPenggunaModel;
-    protected $respondentsModel; 
+    protected $respondentsModel;
 
     public function __construct()
     {
@@ -20,7 +22,7 @@ class KuesionerController extends BaseController
         $this->pertanyaanModel = new PertanyaanModel();
         $this->opsiJawabanModel = new OpsiJawabanModel();
         $this->jawabanPenggunaModel = new JawabanPenggunaModel();
-        $this->respondentsModel = new RespondentsModel(); 
+        $this->respondentsModel = new RespondentsModel();
         helper(['form', 'url', 'session']);
     }
 
@@ -34,18 +36,18 @@ class KuesionerController extends BaseController
     {
         $kuesioner = $this->kuesionerModel->find($kuesionerId);
         if (!$kuesioner || !$kuesioner['is_active']) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Kuesioner tidak ditemukan atau tidak aktif.');
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Kuesioner tidak ditemukan atau tidak aktif.');
         }
 
         session()->set('current_kuesioner_id', $kuesionerId);
-        session()->set('current_question_index', 0); 
-        session()->set('partial_answers', []); 
-        session()->set('response_session_id', uniqid('resp_')); 
+        session()->set('current_question_index', 0);
+        session()->set('partial_answers', []);
+        session()->set('response_session_id', uniqid('resp_'));
 
         return redirect()->to(base_url('kuesioner/question/1'));
     }
 
-    // CARA ALTERNATIF: Langsung mulai kuesioner dari /kuesioner/isi/{id}
+    // CARA ALTERNATIF: Metode untuk memulai kuesioner langsung dari /kuesioner/isi/{id}
     public function start_survey_direct($kuesionerId)
     {
         return $this->start_survey($kuesionerId);
@@ -61,20 +63,20 @@ class KuesionerController extends BaseController
 
         $kuesioner = $this->kuesionerModel->find($kuesionerId);
         $allQuestions = $this->pertanyaanModel->where('kuesioner_id', $kuesionerId)->orderBy('urutan', 'ASC')->findAll();
-        
-        $displayQuestions = array_filter($allQuestions, function($q) {
+
+        $displayQuestions = array_filter($allQuestions, function ($q) {
             return $q['urutan'] > 0;
         });
         $displayQuestions = array_values($displayQuestions);
 
         $totalDisplayQuestions = count($displayQuestions);
         $currentQuestionIndex = $questionNumber - 1;
-        
+
         if ($currentQuestionIndex < 0 || $currentQuestionIndex >= $totalDisplayQuestions) {
             if ($questionNumber > $totalDisplayQuestions) {
                 return redirect()->to(base_url('kuesioner/submit_final'));
             }
-            return redirect()->to(base_url('kuesioner/terimakasih')); 
+            return redirect()->to(base_url('kuesioner/terimakasih'));
         }
 
         $currentQuestion = $displayQuestions[$currentQuestionIndex];
@@ -98,8 +100,8 @@ class KuesionerController extends BaseController
         $currentQuestionNumber = $this->request->getPost('question_number');
         $questionId = $this->request->getPost('question_id');
         $allQuestions = $this->pertanyaanModel->where('kuesioner_id', $kuesionerId)->orderBy('urutan', 'ASC')->findAll();
-        
-        $displayQuestions = array_filter($allQuestions, function($q) {
+
+        $displayQuestions = array_filter($allQuestions, function ($q) {
             return $q['urutan'] > 0;
         });
         $displayQuestions = array_values($displayQuestions);
@@ -134,7 +136,7 @@ class KuesionerController extends BaseController
         ];
         $partialAnswers[$questionId] = $jawabanData;
         session()->set('partial_answers', $partialAnswers);
-        
+
         $nextQuestionNumber = $currentQuestionNumber + 1;
         return redirect()->to(base_url('kuesioner/question/' . $nextQuestionNumber));
     }
@@ -142,7 +144,7 @@ class KuesionerController extends BaseController
     public function previous_question()
     {
         $currentQuestionNumber = $this->request->getPost('question_number');
-        if ($currentQuestionNumber <= 1) { 
+        if ($currentQuestionNumber <= 1) {
             session()->remove('current_kuesioner_id');
             session()->remove('current_question_index');
             session()->remove('partial_answers');
@@ -159,22 +161,22 @@ class KuesionerController extends BaseController
         $partialAnswers = session()->get('partial_answers');
         $responseSessionId = session()->get('response_session_id');
         $ipAddress = $this->request->getIPAddress();
-        $submissionTimestamp = date('Y-m-d H:i:s'); 
+        $submissionTimestamp = date('Y-m-d H:i:s');
 
         if (!$kuesionerId || empty($partialAnswers) || !$responseSessionId) {
             return redirect()->to(base_url('kuesioner'))->with('error', 'Sesi jawaban tidak valid. Silakan mulai ulang kuesioner.');
         }
-        
+
         $respondentData = [
             'response_session_id' => $responseSessionId,
             'ip_address'          => $ipAddress,
-            'submission_timestamp'=> $submissionTimestamp,
+            'submission_timestamp' => $submissionTimestamp,
             'created_at'          => $submissionTimestamp,
             'updated_at'          => $submissionTimestamp,
         ];
         $pertanyaanDemografi = $this->pertanyaanModel->where('kuesioner_id', $kuesionerId)
-                                                ->whereIn('urutan', [1, 2, 3, 4, 5])
-                                                ->findAll();
+            ->whereIn('urutan', [1, 2, 3, 4, 5])
+            ->findAll();
         foreach ($pertanyaanDemografi as $qDemo) {
             if (isset($partialAnswers[$qDemo['id']])) {
                 if ($qDemo['urutan'] == 1) $respondentData['age_group_id'] = $partialAnswers[$qDemo['id']]['opsi_jawaban_id'];
@@ -196,7 +198,7 @@ class KuesionerController extends BaseController
                 'jawaban_teks'      => $jawaban['jawaban_teks'],
                 'ip_address'        => $ipAddress,
                 'response_session_id' => $responseSessionId,
-                'timestamp_isi'     => $submissionTimestamp, 
+                'timestamp_isi'     => $submissionTimestamp,
             ];
         }
 

@@ -7,6 +7,7 @@ use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
+
 use App\Models\UserModel; 
 
 class Validation extends BaseConfig
@@ -23,6 +24,8 @@ class Validation extends BaseConfig
         'single' => 'CodeIgniter\Validation\Views\single',
     ];
 
+    // --- Aturan Validasi Kustom ---
+    // Digunakan di AuthController untuk validasi login
     public function validateUser(string $password, string $fields, array $data, ?string &$error = null): bool
     {
         $userModel = new UserModel();
@@ -47,12 +50,9 @@ class Validation extends BaseConfig
         $userModel = new UserModel();
         $user = $userModel->find($userId);
         if (!$user) {
-            // Jika user tidak ditemukan di sesi, anggap password lama tidak cocok
-            $error = 'Password lama tidak cocok.';
             return false;
         }
         if (!password_verify($inputPassword, $user['password'])) {
-            $error = 'Password lama tidak cocok.';
             return false;
         }
         return true;

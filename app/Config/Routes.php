@@ -27,15 +27,15 @@ $routes->get('/', 'Home::index');
 $routes->get('/kuesioner', 'KuesionerController::index');
 
 // Memulai Survei Kuesioner Multi-Halaman (dari daftar kuesioner)
-$routes->get('/kuesioner/start/(:num)', 'KuesionerController::start_survey/$1'); 
+$routes->get('/kuesioner/start/(:num)', 'KuesionerController::start_survey/$1');
 
 // CARA ALTERNATIF: Langsung mulai kuesioner dari /kuesioner/isi/{id}
 // Ini akan memicu start_survey yang benar.
-$routes->get('/kuesioner/isi/(:num)', 'KuesionerController::start_survey_direct/$1'); 
+$routes->get('/kuesioner/isi/(:num)', 'KuesionerController::start_survey_direct/$1');
 
 
 // Menampilkan Halaman Pertanyaan Spesifik dalam Survei
-$routes->get('/kuesioner/question/(:num)', 'KuesionerController::question/$1'); 
+$routes->get('/kuesioner/question/(:num)', 'KuesionerController::question/$1');
 
 // Memproses Jawaban dari Satu Halaman Pertanyaan (untuk Lanjut ke Pertanyaan Berikutnya)
 $routes->post('/kuesioner/process_answer', 'KuesionerController::process_answer');
@@ -60,7 +60,7 @@ $routes->get('/logout', 'AuthController::logout');
 
 
 // --- Rute Admin (Dilindungi oleh filter 'authAdmin') ---
-$routes->group('admin', ['filter' => 'authAdmin'], function($routes) {
+$routes->group('admin', ['filter' => 'authAdmin'], function ($routes) {
     // Dashboard Admin
     $routes->get('dashboard', 'AdminController::dashboard');
 
@@ -73,8 +73,8 @@ $routes->group('admin', ['filter' => 'authAdmin'], function($routes) {
     $routes->get('kuesioner/delete/(:num)', 'AdminController::deleteKuesioner/$1');
 
     // Manajemen Pertanyaan (terkait dengan Kuesioner tertentu)
-    $routes->get('pertanyaan/(:num)', 'AdminController::pertanyaan/$1'); 
-    $routes->get('pertanyaan/create/(:num)', 'AdminController::createPertanyaan/$1'); 
+    $routes->get('pertanyaan/(:num)', 'AdminController::pertanyaan/$1');
+    $routes->get('pertanyaan/create/(:num)', 'AdminController::createPertanyaan/$1');
     $routes->post('pertanyaan/store', 'AdminController::storePertanyaan');
     $routes->get('pertanyaan/edit/(:num)', 'AdminController::editPertanyaan/$1');
     $routes->post('pertanyaan/update/(:num)', 'AdminController::updatePertanyaan/$1');
