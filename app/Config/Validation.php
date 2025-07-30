@@ -3,16 +3,19 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
+// PENTING: Perhatikan penggunaan backslash (\) sebagai pemisah namespace.
+// Ini harus 'CodeIgniter\Validation\StrictRules\...'
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
-use App\Models\UserModel; 
+
+use App\Models\UserModel; // Pastikan ini diimpor untuk aturan kustom Anda
 
 class Validation extends BaseConfig
 {
     public array $ruleSets = [
-        Rules::class,          // Ini mendaftarkan aturan bawaan seperti 'required', 'array', 'min_length', dll.
+        Rules::class,          // Ini mendaftarkan aturan dasar seperti 'required', 'array', 'min_length', dll.
         FormatRules::class,
         FileRules::class,
         CreditCardRules::class,
@@ -23,8 +26,8 @@ class Validation extends BaseConfig
         'single' => 'CodeIgniter\Validation\Views\single',
     ];
 
-    // --- Aturan Validasi Kustom (yang kita buat sebelumnya) ---
-    // Ini diperlukan oleh AuthController dan AdminController
+    // --- Aturan Validasi Kustom ---
+    // Digunakan di AuthController untuk validasi login
     public function validateUser(string $password, string $fields, array $data, ?string &$error = null): bool
     {
         $userModel = new UserModel();
@@ -42,17 +45,19 @@ class Validation extends BaseConfig
         return true;
     }
 
+    // Digunakan di AdminController untuk update profil (memeriksa password lama)
     public function check_old_password(string $inputPassword, string $field, array $data, ?string &$error = null): bool
     {
         $userId = session()->get('user_id');
         $userModel = new UserModel();
         $user = $userModel->find($userId);
         if (!$user) {
-            $error = 'Pengguna tidak ditemukan.';
+            // Jika user tidak ditemukan di sesi, anggap password lama tidak cocok
+            $error = 'Password lama tidak cocok.';
             return false;
         }
         if (!password_verify($inputPassword, $user['password'])) {
-            $error = 'Password lama salah.';
+            $error = 'Password lama tidak cocok.';
             return false;
         }
         return true;

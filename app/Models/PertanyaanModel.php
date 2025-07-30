@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Models;
+
 use CodeIgniter\Model;
+
 class PertanyaanModel extends Model
 {
     protected $table      = 'pertanyaan';
@@ -14,8 +17,8 @@ class PertanyaanModel extends Model
     public function getPertanyaanWithOpsi($kuesionerId)
     {
         $pertanyaan = $this->where('kuesioner_id', $kuesionerId)
-                           ->orderBy('urutan', 'ASC')
-                           ->findAll();
+            ->orderBy('urutan', 'ASC')
+            ->findAll();
         $opsiJawabanModel = new OpsiJawabanModel();
         foreach ($pertanyaan as &$p) {
             if ($p['jenis_jawaban'] !== 'isian') {

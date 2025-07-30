@@ -23,7 +23,7 @@
                                 <p class="card-text text-muted flex-grow-1"><?= esc($item['deskripsi']) ?></p>
                                 <p class="card-text"><small class="text-<?= $item['is_active'] ? 'success' : 'danger' ?>">Status: <?= $item['is_active'] ? 'Aktif' : 'Tidak Aktif' ?></small></p>
                                 <?php if ($item['is_active']): ?>
-                                    <a href="<?= base_url('kuesioner/isi/' . $item['id']) ?>" class="btn btn-primary mt-2">Isi Kuesioner</a>
+                                    <a href="<?= base_url('kuesioner/start/' . $item['id']) ?>" class="btn btn-primary mt-2">Isi Kuesioner</a>
                                 <?php else: ?>
                                     <button class="btn btn-secondary mt-2 disabled">Tidak Aktif</button>
                                 <?php endif; ?>

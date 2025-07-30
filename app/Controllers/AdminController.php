@@ -5,6 +5,8 @@ use App\Models\PertanyaanModel;
 use App\Models\OpsiJawabanModel;
 use App\Models\UserModel;
 use App\Models\JawabanPenggunaModel;
+use App\Models\RespondentsModel;
+use App\Models\IkmPdfDataModel;
 
 class AdminController extends BaseController
 {
@@ -13,6 +15,8 @@ class AdminController extends BaseController
     protected $opsiJawabanModel;
     protected $userModel;
     protected $jawabanPenggunaModel;
+    protected $respondentsModel;
+    protected $ikmPdfDataModel;
 
     public function __construct()
     {
@@ -21,25 +25,40 @@ class AdminController extends BaseController
         $this->opsiJawabanModel = new OpsiJawabanModel();
         $this->userModel = new UserModel();
         $this->jawabanPenggunaModel = new JawabanPenggunaModel();
+        $this->respondentsModel = new RespondentsModel();
+        $this->ikmPdfDataModel = new IkmPdfDataModel();
         helper(['form', 'url', 'session']);
     }
 
     public function dashboard() {
         $data['totalKuesioner'] = $this->kuesionerModel->countAllResults();
         $data['activeKuesioner'] = $this->kuesionerModel->where('is_active', 1)->countAllResults();
-        
-        $data['totalResponden'] = $this->jawabanPenggunaModel
-                                     ->select('COUNT(DISTINCT ip_address) as total_ips')
-                                     ->get()
-                                     ->getRow('total_ips');
 
-        $avgScoreResult = $this->jawabanPenggunaModel
-                                 ->select('AVG(opsi_jawaban.nilai) as average_score')
-                                 ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                                 ->where('opsi_jawaban.nilai IS NOT NULL')
-                                 ->first();
+        // Mengambil total responden dari tabel respondents
+        $data['totalResponden'] = $this->respondentsModel->countAllResults();
 
-        $data['ikmAverage'] = $avgScoreResult['average_score'] ? round($avgScoreResult['average_score'], 2) : 0;
+        // Perhitungan IKM Rata-rata dari jawaban granular
+        // Mengambil semua jawaban dengan jenis 'skala' yang memiliki nilai
+        $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
+                                            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+                                            ->where('pertanyaan.jenis_jawaban', 'skala')
+                                            ->countAllResults();
+
+        // Menjumlahkan semua nilai dari jawaban 'skala'
+        $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
+                                       ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
+                                       ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+                                       ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+                                       ->where('pertanyaan.jenis_jawaban', 'skala')
+                                       ->where('opsi_jawaban.nilai IS NOT NULL')
+                                       ->get()
+                                       ->getRow('sum_nilai');
+
+        $ikmRataRataHasil = 0;
+        if ($totalJawabanSkalaDiberikan > 0) {
+            $ikmRataRataHasil = ($totalNilaiJawabanSkala / $totalJawabanSkalaDiberikan);
+        }
+        $data['ikmAverage'] = round($ikmRataRataHasil, 2);
         if ($data['ikmAverage'] > 5.0) $data['ikmAverage'] = 5.0;
 
         $data['recentKuesioner'] = $this->kuesionerModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
@@ -53,7 +72,16 @@ class AdminController extends BaseController
     }
     public function createKuesioner() { return view('admin/kuesioner/create'); }
     public function storeKuesioner() {
-        // --- VALIDASI DIHILANGKAN ---
+        // --- VALIDASI SEDERHANA ---
+        $rules = [
+            'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
+            'deskripsi'      => 'permit_empty',
+        ];
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+        // --- AKHIR VALIDASI ---
+
         $data = [
             'nama_kuesioner' => $this->request->getPost('nama_kuesioner'),
             'deskripsi'      => $this->request->getPost('deskripsi'),
@@ -71,7 +99,16 @@ class AdminController extends BaseController
         return view('admin/kuesioner/edit', $data);
     }
     public function updateKuesioner($id) {
-        // --- VALIDASI DIHILANGKAN ---
+        // --- VALIDASI SEDERHANA ---
+        $rules = [
+            'nama_kuesioner' => 'required|min_length[3]|max_length[255]',
+            'deskripsi'      => 'permit_empty',
+        ];
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+        // --- AKHIR VALIDASI ---
+
         $data = [
             'nama_kuesioner' => $this->request->getPost('nama_kuesioner'),
             'deskripsi'      => $this->request->getPost('deskripsi'),
@@ -103,8 +140,30 @@ class AdminController extends BaseController
         return view('admin/pertanyaan/create', $data);
     }
     public function storePertanyaan() {
+        // Ambil kuesioner_id dari POST request
         $kuesionerId = $this->request->getPost('kuesioner_id');
-        // --- VALIDASI DIHILANGKAN ---
+
+        // --- VALIDASI SEDERHANA ---
+        $rules = [
+            'kuesioner_id'    => 'required|is_natural_no_zero',
+            'teks_pertanyaan' => 'required|min_length[5]',
+            'jenis_jawaban'   => 'required|in_list[skala,pilihan_ganda,isian]',
+            'urutan'          => 'required|is_natural_no_zero',
+        ];
+        $jenisJawaban = $this->request->getPost('jenis_jawaban');
+        if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
+            $rules['opsi_teks'] = 'required|array';
+            $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
+            if ($jenisJawaban === 'skala') {
+                $rules['opsi_nilai'] = 'required|array';
+                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
+            }
+        }
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+        // --- AKHIR VALIDASI ---
+
         $pertanyaanData = [
             'kuesioner_id'    => $kuesionerId,
             'teks_pertanyaan' => $this->request->getPost('teks_pertanyaan'),
@@ -115,7 +174,6 @@ class AdminController extends BaseController
         $pertanyaanId = $this->pertanyaanModel->insert($pertanyaanData); 
 
         if ($pertanyaanId) {
-            $jenisJawaban = $this->request->getPost('jenis_jawaban');
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
                 $opsiTeks = $this->request->getPost('opsi_teks');
                 $opsiNilai = $this->request->getPost('opsi_nilai');
@@ -149,14 +207,33 @@ class AdminController extends BaseController
         $pertanyaan = $this->pertanyaanModel->find($id);
         if (empty($pertanyaan)) { throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.'); }
 
-        // --- VALIDASI DIHILANGKAN ---
+        // --- VALIDASI SEDERHANA ---
+        $rules = [
+            'teks_pertanyaan' => 'required|min_length[5]',
+            'jenis_jawaban'   => 'required|in_list[skala,pilihan_ganda,isian]',
+            'urutan'          => 'required|is_natural_no_zero',
+        ];
+        $jenisJawaban = $this->request->getPost('jenis_jawaban');
+        if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
+            $rules['opsi_teks'] = 'required|array';
+            $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
+            if ($jenisJawaban === 'skala') {
+                $rules['opsi_nilai'] = 'required|array';
+                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
+            }
+        }
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+        // --- AKHIR VALIDASI ---
+
         $pertanyaanData = [
             'teks_pertanyaan' => $this->request->getPost('teks_pertanyaan'),
             'jenis_jawaban'   => $this->request->getPost('jenis_jawaban'),
             'urutan'          => $this->request->getPost('urutan'),
         ];
         if ($this->pertanyaanModel->update($id, $pertanyaanData)) {
-            $jenisJawaban = $this->request->getPost('jenis_jawaban'); 
+            $jenisJawaban = $this->request->getPost('jenis_jawaban');
             $this->opsiJawabanModel->where('pertanyaan_id', $id)->delete();
 
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
@@ -201,13 +278,36 @@ class AdminController extends BaseController
         $userId = session()->get('user_id');
         $user = $this->userModel->find($userId);
 
-        // --- VALIDASI DIHILANGKAN ---
+        // --- VALIDASI SEDERHANA ---
+        $rules = [
+            'username' => 'required|min_length[3]|max_length[255]',
+            'email'    => 'required|valid_email|max_length[255]',
+        ];
+        // Validasi unik untuk username dan email jika diubah
+        if ($user && $this->request->getPost('username') !== $user['username']) {
+            $rules['username'] .= '|is_unique[users.username,id,' . $userId . ']';
+        }
+        if ($user && $this->request->getPost('email') !== $user['email']) {
+            $rules['email'] .= '|is_unique[users.email,id,' . $userId . ']';
+        }
+
+        // Jika ada input password lama/baru, tambahkan aturan validasi password
+        if ($this->request->getPost('old_password') || $this->request->getPost('new_password')) {
+            $rules['old_password'] = 'required|check_old_password[old_password]'; // Menggunakan aturan kustom
+            $rules['new_password'] = 'required|min_length[6]|matches[confirm_new_password]';
+            $rules['confirm_new_password'] = 'required';
+        }
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+        // --- AKHIR VALIDASI ---
+
         $dataToUpdate = [
             'username' => $this->request->getPost('username'),
             'email'    => $this->request->getPost('email'),
         ];
         if ($this->request->getPost('new_password')) {
-            $dataToUpdate['password'] = $this->request->getPost('new_password'); // Akan di-hash oleh model's beforeUpdate
+            $dataToUpdate['password'] = password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT);
         }
         if ($this->userModel->update($userId, $dataToUpdate)) {
             session()->set([
@@ -220,54 +320,52 @@ class AdminController extends BaseController
         }
     }
 
-    // Aturan validasi kustom check_old_password (tetap ada karena model memanggilnya, namun tidak terpicu jika validasi dinonaktifkan di atas)
-    public function check_old_password(string $inputPassword, string $field, array $data, ?string &$error = null): bool
-    {
-        $userId = session()->get('user_id');
-        $user = $this->userModel->find($userId);
-        if (!$user) {
-            $error = 'Pengguna tidak ditemukan.';
-            return false;
-        }
-        if (!password_verify($inputPassword, $user['password'])) {
-            $error = 'Password lama salah.';
-            return false;
-        }
-        return true;
-    }
-
 
     // --- Hasil IKM ---
     public function hasil() {
         $kuesionerList = $this->kuesionerModel->findAll();
-        
+
         $data['kuesionerList'] = $kuesionerList; // Untuk dropdown filter
 
-        $totalRespondenHasil = $this->jawabanPenggunaModel->select('COUNT(DISTINCT ip_address) as total_ips')->get()->getRow('total_ips');
-        $data['totalRespondenHasil'] = $totalRespondenHasil;
+        // Mengambil total responden dari tabel respondents
+        $data['totalRespondenHasil'] = $this->jawabanPenggunaModel->select('COUNT(DISTINCT response_session_id) as total_sessions')->get()->getRow('total_sessions');
 
-        $avgIkmResult = $this->jawabanPenggunaModel
-                             ->select('AVG(opsi_jawaban.nilai) as average_score')
-                             ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                             ->where('opsi_jawaban.nilai IS NOT NULL')
-                             ->first();
-        $ikmRataRataHasil = round($avgIkmResult['average_score'] ?? 0, 2);
-        $data['ikmRataRataHasil'] = $ikmRataRataHasil;
+        // Perhitungan IKM Rata-rata dari jawaban granular
+        // Mengambil semua jawaban dengan jenis 'skala' yang memiliki nilai
+        $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->countAllResults();
 
-        // Perhitungan persentase puas (contoh: nilai 4 atau 5 dianggap puas dari skala 1-5)
+        // Menjumlahkan semua nilai dari jawaban 'skala'
+        $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
+            ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->where('opsi_jawaban.nilai IS NOT NULL')
+            ->get()
+            ->getRow('sum_nilai');
+
+        $ikmRataRataHasil = 0;
+        if ($totalJawabanSkalaDiberikan > 0) {
+            $ikmRataRataHasil = ($totalNilaiJawabanSkala / $totalJawabanSkalaDiberikan);
+        }
+        $data['ikmAverage'] = round($ikmRataRataHasil, 2);
+
+        // Perhitungan persentase puas (contoh: nilai 3 atau 4 dianggap puas dari skala 1-4/5)
         $totalPuas = $this->jawabanPenggunaModel
-                          ->select('COUNT(jawaban_pengguna.id) as count_puas')
-                          ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
-                          ->where('opsi_jawaban.nilai >=', 4)
-                          ->countAllResults();
+            ->select('COUNT(jawaban_pengguna.id) as count_puas')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->where('opsi_jawaban.nilai >=', 3) // Misal, nilai 3 atau lebih dianggap puas
+            ->countAllResults();
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
-                                     ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
-                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
-                                     ->countAllResults();
-        
+            ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->countAllResults(); // Menghitung total semua jawaban yang ada opsi nilai
         $data['persentasePuasHasil'] = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
 
-        // Detail hasil per pertanyaan (untuk kuesioner pertama yang aktif, atau yang dipilih)
+        // Detail hasil per pertanyaan
         $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first();
         $data['detailHasilPertanyaan'] = [];
         if ($activeKuesioner) {
@@ -308,54 +406,100 @@ class AdminController extends BaseController
             }
         }
 
+        // Data IKM PDF (jika ada)
+        // Pastikan model IkmPdfDataModel sudah dibuat dan berfungsi
+        $ikmPdfDataRaw = $this->ikmPdfDataModel->findAll();
+        $data['ikmPdfData'] = $ikmPdfDataRaw; // Masukkan data IkmPdfDataModel ke view
+
         return view('admin/hasil/index', $data);
     }
 
-    // --- Export CSV ---
     public function exportCsvHasil() {
-        // Logika pengambilan data serupa dengan method hasil()
-        $totalRespondenHasil = $this->jawabanPenggunaModel->select('COUNT(DISTINCT ip_address) as total_ips')->get()->getRow('total_ips');
-        $avgIkmResult = $this->jawabanPenggunaModel
-                             ->select('AVG(opsi_jawaban.nilai) as average_score')
-                             ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id', 'left')
-                             ->where('opsi_jawaban.nilai IS NOT NULL')
-                             ->first();
-        $ikmRataRataHasil = round($avgIkmResult['average_score'] ?? 0, 2);
-        
+        // Header untuk download CSV
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=hasil_ikm_' . date('Y-m-d') . '.csv');
+
+        // Buka output stream
+        $output = fopen('php://output', 'w');
+
+        // Tulis BOM untuk UTF-8
+        fwrite($output, "\xEF\xBB\xBF");
+
+        // Header CSV
+        fputcsv($output, [
+            'Statistik',
+            'Nilai'
+        ]);
+
+        // Hitung data statistik
+        $totalRespondenHasil = $this->respondentsModel->countAllResults();
+
+        $totalSkalaPertanyaan = $this->pertanyaanModel->where('jenis_jawaban', 'skala')->countAllResults();
+        $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
+                                            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+                                            ->where('pertanyaan.jenis_jawaban', 'skala')
+                                            ->countAllResults();
+
+        $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
+            ->select('SUM(opsi_jawaban.nilai) as sum_nilai')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
+            ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->where('opsi_jawaban.nilai IS NOT NULL')
+            ->get()
+            ->getRow('sum_nilai');
+
+        $ikmRataRataHasil = 0;
+        if ($totalJawabanSkalaDiberikan > 0) {
+            $ikmRataRataHasil = ($totalNilaiJawabanSkala / $totalJawabanSkalaDiberikan);
+        }
+        $ikmRataRataHasil = round($ikmRataRataHasil, 2);
+
         $totalPuas = $this->jawabanPenggunaModel
-                          ->select('COUNT(jawaban_pengguna.id) as count_puas')
-                          ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
-                          ->where('opsi_jawaban.nilai >=', 4)
-                          ->countAllResults();
+            ->select('COUNT(jawaban_pengguna.id) as count_puas')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->where('opsi_jawaban.nilai >=', 3) // Misal, nilai 3 atau lebih dianggap puas
+            ->countAllResults();
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
-                                     ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
-                                     ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id') 
-                                     ->countAllResults();
+            ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->countAllResults(); // Menghitung total semua jawaban yang ada opsi nilai
         $persentasePuasHasil = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
-        
-        $detailHasilPertanyaan = [];
+
+        // Tulis data statistik ke CSV
+        fputcsv($output, ['Total Responden', $totalRespondenHasil]);
+        fputcsv($output, ['Total Pertanyaan Skala', $totalSkalaPertanyaan]);
+        fputcsv($output, ['Total Jawaban Skala', $totalJawabanSkalaDiberikan]);
+        fputcsv($output, ['IKM Rata-rata', $ikmRataRataHasil]);
+        fputcsv($output, ['Persentase Puas (%)', $persentasePuasHasil]);
+
+        // Tambah baris kosong
+        fputcsv($output, []);
+
+        // Header detail pertanyaan
+        fputcsv($output, ['Detail Per Pertanyaan', '']);
+        fputcsv($output, ['Pertanyaan', 'Jenis', 'Opsi/Statistik', 'Jumlah', 'Persentase']);
+
+        // Detail hasil per pertanyaan
         $activeKuesioner = $this->kuesionerModel->where('is_active', 1)->first();
         if ($activeKuesioner) {
             $pertanyaanList = $this->pertanyaanModel->getPertanyaanWithOpsi($activeKuesioner['id']);
             foreach ($pertanyaanList as $pertanyaan) {
-                $detail = [
-                    'teks_pertanyaan' => $pertanyaan['teks_pertanyaan'],
-                    'jenis_jawaban'   => $pertanyaan['jenis_jawaban'],
-                    'statistik'       => [],
-                    'saran'           => []
-                ];
-
                 if ($pertanyaan['jenis_jawaban'] !== 'isian') {
                     $totalJawabanPertanyaan = $this->jawabanPenggunaModel->where('pertanyaan_id', $pertanyaan['id'])->countAllResults();
                     foreach ($pertanyaan['opsi'] as $opsi) {
                         $count = $this->jawabanPenggunaModel->where('opsi_jawaban_id', $opsi['id'])->countAllResults();
                         $percentage = ($totalJawabanPertanyaan > 0) ? round(($count / $totalJawabanPertanyaan) * 100, 2) : 0;
-                        $detail['statistik'][] = [
-                            'opsi_teks' => $opsi['opsi_teks'],
-                            'count'     => $count,
-                            'percentage'=> $percentage
-                        ];
+                        fputcsv($output, [
+                            $pertanyaan['teks_pertanyaan'],
+                            $pertanyaan['jenis_jawaban'],
+                            $opsi['opsi_teks'],
+                            $count,
+                            $percentage . '%'
+                        ]);
                     }
+
+                    // Jika pertanyaan skala, tambahkan rata-rata nilai
                     if ($pertanyaan['jenis_jawaban'] === 'skala') {
                         $avgNilai = $this->jawabanPenggunaModel
                                          ->select('AVG(opsi_jawaban.nilai) as avg_score')
@@ -363,61 +507,49 @@ class AdminController extends BaseController
                                          ->where('jawaban_pengguna.pertanyaan_id', $pertanyaan['id'])
                                          ->where('opsi_jawaban.nilai IS NOT NULL')
                                          ->first();
-                        $detail['statistik']['rata_rata_nilai'] = round($avgNilai['avg_score'] ?? 0, 2);
+                        fputcsv($output, [
+                            '',
+                            '',
+                            'Rata-rata Nilai',
+                            round($avgNilai['avg_score'] ?? 0, 2),
+                            ''
+                        ]);
                     }
                 } else {
-                    $saran = $this->jawabanPenggunaModel->where('pertanyaan_id', $pertanyaan['id'])->where('jawaban_teks IS NOT NULL')->findAll();
-                    $detail['saran'] = array_map(function($j){ return ['teks' => $j['jawaban_teks'], 'timestamp' => $j['timestamp_isi']]; }, $saran);
+                    // Untuk pertanyaan isian (saran)
+                    $saran = $this->jawabanPenggunaModel
+                        ->where('pertanyaan_id', $pertanyaan['id'])
+                        ->where('jawaban_teks IS NOT NULL')
+                        ->findAll();
+
+                    fputcsv($output, [
+                        $pertanyaan['teks_pertanyaan'],
+                        $pertanyaan['jenis_jawaban'],
+                        'Total Saran',
+                        count($saran),
+                        ''
+                    ]);
+
+                    // Tambahkan beberapa saran sebagai contoh (maksimal 10)
+                    $maxSaran = min(10, count($saran));
+                    for ($i = 0; $i < $maxSaran; $i++) {
+                        fputcsv($output, [
+                            '',
+                            '',
+                            'Saran ' . ($i + 1),
+                            $saran[$i]['jawaban_teks'],
+                            $saran[$i]['timestamp_isi']
+                        ]);
+                    }
                 }
-                $detailHasilPertanyaan[] = $detail;
+
+                // Baris kosong setelah setiap pertanyaan
+                fputcsv($output, []);
             }
         }
 
-        // --- Persiapan Data CSV ---
-        $fileName = 'laporan_ikm_' . date('Ymd_His') . '.csv';
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $fileName . '"');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-
-        $output = fopen('php://output', 'w');
-
-        // Header CSV
-        fputcsv($output, ['Laporan Indeks Kepuasan Masyarakat']);
-        fputcsv($output, ['Tanggal Laporan: ' . date('d-m-Y H:i:s')]);
-        fputcsv($output, []); // Baris kosong
-
-        fputcsv($output, ['RINGKASAN UMUM']);
-        fputcsv($output, ['Total Responden', 'Nilai IKM Rata-rata (/5.0)', 'Persentase Puas (%)']);
-        fputcsv($output, [esc($totalRespondenHasil), number_format(esc($ikmRataRataHasil), 2), esc($persentasePuasHasil)]);
-        fputcsv($output, []);
-
-        fputcsv($output, ['DETAIL HASIL PER PERTANYAAN']);
-        foreach ($detailHasilPertanyaan as $detail) {
-            fputcsv($output, ['Pertanyaan:', esc($detail['teks_pertanyaan'])]);
-            if ($detail['jenis_jawaban'] !== 'isian') {
-                foreach ($detail['statistik'] as $stat) {
-                    if (isset($stat['opsi_teks'])) {
-                        fputcsv($output, [esc($stat['opsi_teks']), esc($stat['count']), esc($stat['percentage']) . '%']);
-                    }
-                }
-                if (isset($detail['statistik']['rata_rata_nilai'])) {
-                    fputcsv($output, ['Rata-rata Nilai', number_format(esc($detail['statistik']['rata_rata_nilai']), 2)]);
-                }
-            } else {
-                fputcsv($output, ['Saran/Masukan:']);
-                if (empty($detail['saran'])) {
-                    fputcsv($output, ['- Tidak ada saran -']);
-                } else {
-                    foreach ($detail['saran'] as $saran) {
-                        fputcsv($output, ['"', esc($saran['teks']), '"', esc($saran['timestamp'])]);
-                    }
-                }
-            }
-            fputcsv($output, []); // Baris kosong antar pertanyaan
-        }
-
+        // Tutup output stream
         fclose($output);
-        exit(); // Penting untuk menghentikan eksekusi setelah output CSV
+        exit;
     }
 }

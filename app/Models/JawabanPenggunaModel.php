@@ -5,8 +5,8 @@ class JawabanPenggunaModel extends Model
 {
     protected $table      = 'jawaban_pengguna';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['kuesioner_id', 'pertanyaan_id', 'opsi_jawaban_id', 'jawaban_teks', 'ip_address', 'timestamp_isi'];
-    protected $useTimestamps = false; // Karena timestamp_isi diatur manual di Controller
+    protected $allowedFields = ['kuesioner_id', 'pertanyaan_id', 'opsi_jawaban_id', 'jawaban_teks', 'ip_address', 'response_session_id', 'timestamp_isi'];
+    protected $useTimestamps = false; // Karena timestamp_isi diatur manual
     protected $createdField  = 'timestamp_isi';
     protected $updatedField  = false;
 }

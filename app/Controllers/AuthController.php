@@ -1,20 +1,21 @@
 <?php
 namespace App\Controllers;
-use App\Models\UserModel; 
+use App\Models\UserModel;
+use CodeIgniter\Controller; // Pastikan ini diimpor jika tidak ada di BaseController
 
-class AuthController extends BaseController 
+class AuthController extends BaseController
 {
     protected $userModel;
 
     public function __construct()
     {
-        $this->userModel = new UserModel(); 
-        helper(['form', 'url', 'session']); 
+        $this->userModel = new UserModel();
+        helper(['form', 'url', 'session']);
     }
 
     public function login()
     {
-        // Jika user sudah login, arahkan langsung ke dashboard
+        // Redirect ke dashboard jika sudah login
         if (session()->get('logged_in')) {
             return redirect()->to(base_url('admin/dashboard'));
         }
@@ -23,39 +24,43 @@ class AuthController extends BaseController
 
     public function processLogin()
     {
-        $session = session(); // Ambil instance session
-        $username = $this->request->getPost('username'); // Ambil username dari form
-        $password = $this->request->getPost('password'); // Ambil password dari form
+        $session = session();
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
 
-        // Cari user di database berdasarkan username
+        // --- VALIDASI UNTUK LOGIN ---
+        $rules = [
+            'username' => 'required|min_length[3]|max_length[50]',
+            // 'validateUser' adalah aturan kustom dari app/Config/Validation.php
+            'password' => 'required|min_length[6]|validateUser[username,password]',
+        ];
+
+        // Jalankan validasi
+        if (!$this->validate($rules)) {
+            // Jika validasi gagal, kembalikan ke form dengan error
+            return redirect()->back()->withInput()->with('validation', $this->validator);
+        }
+
+        // Jika validasi berhasil (yaitu, username dan password cocok),
+        // ambil data pengguna untuk disimpan di sesi.
         $user = $this->userModel->where('username', $username)->first();
 
-        // Cek apakah user ditemukan DAN password cocok dengan hash di database
-        if ($user && password_verify($password, $user['password'])) {
-            // Jika kredensial cocok, set data sesi
-            $ses_data = [
-                'user_id'   => $user['id'],
-                'username'  => $user['username'],
-                'email'     => $user['email'],
-                'logged_in' => TRUE // Indikator bahwa user sudah login
-            ];
-            $session->set($ses_data); // Simpan data sesi
+        $ses_data = [
+            'user_id'   => $user['id'],
+            'username'  => $user['username'],
+            'email'     => $user['email'],
+            'logged_in' => TRUE,
+            'role'      => 'admin' // Menambahkan role jika Anda memiliki sistem role
+        ];
+        $session->set($ses_data);
 
-            // Redirect ke dashboard admin dengan pesan sukses
-            return redirect()->to(base_url('admin/dashboard'))->with('success', 'Selamat datang, ' . $user['username'] . '!');
-        } else {
-            // Jika user tidak ditemukan atau password tidak cocok, set pesan error flashdata
-            $session->setFlashdata('error', 'Username atau Password salah.');
-            // Kembali ke halaman login dengan input lama agar user tidak perlu mengetik ulang username
-            return redirect()->back()->withInput();
-        }
+        return redirect()->to(base_url('admin/dashboard'))->with('success', 'Selamat datang, ' . $user['username'] . '!');
     }
 
     public function logout()
     {
-        $session = session(); // Ambil instance session
-        $session->destroy(); // Hancurkan semua data sesi
-        // Redirect ke halaman login dengan pesan sukses logout
+        $session = session();
+        $session->destroy();
         return redirect()->to(base_url('login'))->with('success', 'Anda telah logout.');
     }
 }
