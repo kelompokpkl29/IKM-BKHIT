@@ -393,3 +393,223 @@ in SYSTEMPATH/Validation/Validation.php on line 345.
  8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
  9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
 10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 11:33:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:33:26 --> CSRF token verified.
+DEBUG - 2025-07-30 11:33:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 11:33:26 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 11:35:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:35:42 --> CSRF token verified.
+DEBUG - 2025-07-30 11:35:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:35:45 --> CSRF token verified.
+DEBUG - 2025-07-30 11:35:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:35:50 --> CSRF token verified.
+DEBUG - 2025-07-30 11:35:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:35:57 --> CSRF token verified.
+DEBUG - 2025-07-30 11:35:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:35:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:01 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:07 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:10 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:13 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:17 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:20 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:25 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:31 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:35 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:40 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:44 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:36:47 --> CSRF token verified.
+DEBUG - 2025-07-30 11:36:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:36:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 11:37:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:37:30 --> CSRF token verified.
+DEBUG - 2025-07-30 11:37:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 11:37:30 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+INFO - 2025-07-30 11:45:10 --> CSRF token verified.
+DEBUG - 2025-07-30 11:45:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 11:45:10 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 11:45:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 11:45:17 --> CSRF token verified.
+DEBUG - 2025-07-30 11:45:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 11:45:17 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+INFO - 2025-07-30 11:45:22 --> CSRF token verified.
+DEBUG - 2025-07-30 11:45:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 11:45:22 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 15:25:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:25:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:28:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:28:56 --> CSRF token verified.
+DEBUG - 2025-07-30 15:28:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 15:28:56 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 15:29:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:29:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:29:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:29:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:30:23 --> CSRF token verified.
+DEBUG - 2025-07-30 15:30:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 15:30:23 --> CodeIgniter\Validation\Exceptions\ValidationException: "validateUser" is not a valid rule.
+[Method: POST, Route: login/process]
+in SYSTEMPATH/Validation/Validation.php on line 345.
+ 1 SYSTEMPATH/Validation/Validation.php(345): CodeIgniter\Validation\Exceptions\ValidationException::forRuleNotFound('validateUser')
+ 2 SYSTEMPATH/Validation/Validation.php(201): CodeIgniter\Validation\Validation->processRules('password', 'password', 'password1123', [...], [...], 'password')
+ 3 SYSTEMPATH/Controller.php(138): CodeIgniter\Validation\Validation->run()
+ 4 APPPATH/Controllers/AuthController.php(36): CodeIgniter\Controller->validate([...])
+ 5 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\AuthController->processLogin()
+ 6 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\AuthController))
+ 7 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-07-30 15:38:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:38:43 --> CSRF token verified.
+DEBUG - 2025-07-30 15:38:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-07-30 15:38:43 --> ErrorException: static::class cannot be used for compile-time class name resolution
+[Method: POST, Route: login/process]
+in APPPATH/Config/Validation.php on line 15.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+DEBUG - 2025-07-30 15:42:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:42:40 --> CSRF token verified.
+DEBUG - 2025-07-30 15:42:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:42:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:42:47 --> CSRF token verified.
+DEBUG - 2025-07-30 15:42:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:42:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:42:55 --> CSRF token verified.
+DEBUG - 2025-07-30 15:42:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:42:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:43:52 --> CSRF token verified.
+DEBUG - 2025-07-30 15:43:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:43:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:43:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:43:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:43:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:43:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:44:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:47:15 --> CSRF token verified.
+DEBUG - 2025-07-30 15:47:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:47:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:47:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:47:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:50:18 --> CSRF token verified.
+DEBUG - 2025-07-30 15:50:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:50:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:50:26 --> CSRF token verified.
+DEBUG - 2025-07-30 15:50:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:50:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:50:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-07-30 15:51:08 --> CSRF token verified.
+DEBUG - 2025-07-30 15:51:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-07-30 15:51:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

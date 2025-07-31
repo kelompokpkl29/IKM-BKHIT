@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Database\Migrations;
+
 use CodeIgniter\Database\Migration;
+
 class CreateIkmTables extends Migration
 {
     public function up()
@@ -65,6 +68,8 @@ class CreateIkmTables extends Migration
             'education_id'        => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
             'occupation_id'       => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
             'service_type_id'     => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
+            'respondent_name'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // Dari Q0 (Pendahuluan) jika ada nama responden
+            'team_name'           => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // Dari Q0 jika ada nama tim
             'ip_address'          => ['type' => 'VARCHAR', 'constraint' => 45, 'null' => true],
             'submission_timestamp' => ['type' => 'DATETIME', 'default' => 'CURRENT_TIMESTAMP'],
             'created_at'          => ['type' => 'DATETIME', 'null' => true],
@@ -95,8 +100,6 @@ class CreateIkmTables extends Migration
         $this->forge->addForeignKey('kuesioner_id', 'kuesioner', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('pertanyaan_id', 'pertanyaan', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('opsi_jawaban_id', 'opsi_jawaban', 'id', 'SET NULL', 'CASCADE');
-        // Optional: Foreign key from jawaban_pengguna.response_session_id to respondents.response_session_id
-        // $this->forge->addForeignKey('response_session_id', 'respondents', 'response_session_id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('jawaban_pengguna');
 
 
@@ -105,24 +108,22 @@ class CreateIkmTables extends Migration
             'id'                => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
             'name'              => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // "Name" dari PDF
             'date_recorded'     => ['type' => 'DATE', 'null' => true], // "Date" dari PDF
-            'timestamp_recorded'=> ['type' => 'DATETIME', 'null' => true], // "Timestamp" dari PDF
+            'timestamp_recorded' => ['type' => 'DATETIME', 'null' => true], // "Timestamp" dari PDF
             'team_name'         => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // "Team Name" dari PDF
             'total_score'       => ['type' => 'INT', 'constraint' => 11, 'null' => true], // "Total Score" dari PDF
-            // Kolom aspek generik (contoh, berdasarkan '1's di PDF)
-            'aspect_a'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_b'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_c'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_d'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_e'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_f'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_g'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
-            'aspect_h'          => ['type' => 'INT', 'constraint' => 1, 'null' => true], 
+            'aspect_a'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_b'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_c'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_d'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_e'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_f'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_g'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
+            'aspect_h'          => ['type' => 'INT', 'constraint' => 1, 'null' => true],
             'created_at'        => ['type' => 'DATETIME', 'null' => true],
             'updated_at'        => ['type' => 'DATETIME', 'null' => true],
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->createTable('ikm_pdf_data');
-
     }
 
     public function down()

@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Database\Seeds;
+
 use CodeIgniter\Database\Seeder;
 use App\Models\KuesionerModel;
 use App\Models\PertanyaanModel;
 use App\Models\OpsiJawabanModel;
 use App\Models\JawabanPenggunaModel;
-use App\Models\RespondentsModel; 
+use App\Models\RespondentsModel;
 
 class KuesionerSeeder extends Seeder
 {
@@ -15,14 +17,14 @@ class KuesionerSeeder extends Seeder
         $pertanyaanModel = new PertanyaanModel();
         $opsiJawabanModel = new OpsiJawabanModel();
         $jawabanPenggunaModel = new JawabanPenggunaModel();
-        $respondentsModel = new RespondentsModel(); 
+        $respondentsModel = new RespondentsModel();
 
-        // Pastikan database bersih dari data kuesioner lama
+        // Pastikan database bersih dari data kuesioner lama sebelum seeding
         $jawabanPenggunaModel->emptyTable();
         $opsiJawabanModel->emptyTable();
         $pertanyaanModel->emptyTable();
         $kuesionerModel->emptyTable();
-        $respondentsModel->emptyTable(); 
+        $respondentsModel->emptyTable();
 
         // --- Kuesioner Utama: Indeks Kepuasan Masyarakat ---
         $kuesionerIdIKM = $kuesionerModel->insert([
@@ -35,11 +37,14 @@ class KuesionerSeeder extends Seeder
 
         if ($kuesionerIdIKM) {
             // --- Bagian Pendahuluan ---
-            // Ini pertanyaan 0, tidak tampilkan di form
             $pertanyaanModel->insert([
-                'kuesioner_id'    => $kuesionerIdIKM, 'teks_pertanyaan' => 'Pendahuluan: Assalamu alaikum Warahmatullahi Wabarakatuh (Pembukaan)',
-                'jenis_jawaban'   => 'isian', 'urutan' => 0, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')
-            ]); 
+                'kuesioner_id'    => $kuesionerIdIKM,
+                'teks_pertanyaan' => 'Pendahuluan: Assalamu alaikum Warahmatullahi Wabarakatuh (Pembukaan)',
+                'jenis_jawaban'   => 'isian',
+                'urutan' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
 
             // --- Pertanyaan 1-14 dari Screenshot (sesuai urutan gambar) ---
 
@@ -163,18 +168,18 @@ class KuesionerSeeder extends Seeder
             $opsiJawabanModel->insertBatch([
                 ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Sangat Kurang', 'nilai' => 1, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
                 ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Cukup', 'nilai' => 2, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
-                ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Baik', 'nilai' => 3, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')], 
-                ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Baik Sekali', 'nilai' => 4, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')], 
+                ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Baik', 'nilai' => 3, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
+                ['pertanyaan_id' => $q14_id, 'opsi_teks' => 'Baik Sekali', 'nilai' => 4, 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')],
             ]);
 
             // Generate Dummy Responses untuk mengisi tabel jawaban_pengguna dan respondents
             $this->generateDummyResponses($kuesionerIdIKM, $pertanyaanModel, $opsiJawabanModel, $jawabanPenggunaModel, $respondentsModel);
-
-        } // End if kuesionerIdIKM
+        }
     }
 
     // Fungsi helper untuk generate dummy responses
-    private function generateDummyResponses($kuesionerId, $pertanyaanModel, $opsiJawabanModel, $jawabanPenggunaModel, $respondentsModel) {
+    private function generateDummyResponses($kuesionerId, $pertanyaanModel, $opsiJawabanModel, $jawabanPenggunaModel, $respondentsModel)
+    {
         $allQuestions = $pertanyaanModel->where('kuesioner_id', $kuesionerId)->orderBy('urutan', 'ASC')->findAll();
 
         // Ambil ID opsi untuk pertanyaan-pertanyaan yang butuh skor dan demografi
@@ -186,10 +191,10 @@ class KuesionerSeeder extends Seeder
                 if ($q['jenis_jawaban'] === 'skala' && $o['nilai'] !== null) {
                     $opsiMap[$q['id']]['skala'][$o['nilai']] = $o['id'];
                 } else { // Pilihan ganda
-                    $opsiMap[$q['id']]['pilihan_ganda'][] = $o['id']; 
+                    $opsiMap[$q['id']]['pilihan_ganda'][] = $o['id'];
                 }
             }
-            if ($q['urutan'] >= 1 && $q['urutan'] <= 5) { 
+            if ($q['urutan'] >= 1 && $q['urutan'] <= 5) {
                 $qDemografiIds[$q['urutan']] = $q['id'];
             }
         }
@@ -209,15 +214,15 @@ class KuesionerSeeder extends Seeder
             $respondentData = [
                 'response_session_id' => $responseSessionId,
                 'ip_address'          => $ip,
-                'submission_timestamp'=> $timestamp,
+                'submission_timestamp' => $timestamp,
                 'created_at'          => $timestamp,
                 'updated_at'          => $timestamp,
                 // Ambil ID opsi demografi dari map
-                'age_group_id'        => $opsiMap[$qDemografiIds[1]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[1]]['pilihan_ganda']) -1)] ?? null,
-                'gender_id'           => $opsiMap[$qDemografiIds[2]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[2]]['pilihan_ganda']) -1)] ?? null,
-                'education_id'        => $opsiMap[$qDemografiIds[3]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[3]]['pilihan_ganda']) -1)] ?? null,
-                'occupation_id'       => $opsiMap[$qDemografiIds[4]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[4]]['pilihan_ganda']) -1)] ?? null,
-                'service_type_id'     => $opsiMap[$qDemografiIds[5]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[5]]['pilihan_ganda']) -1)] ?? null,
+                'age_group_id'        => $opsiMap[$qDemografiIds[1]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[1]]['pilihan_ganda']) - 1)] ?? null,
+                'gender_id'           => $opsiMap[$qDemografiIds[2]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[2]]['pilihan_ganda']) - 1)] ?? null,
+                'education_id'        => $opsiMap[$qDemografiIds[3]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[3]]['pilihan_ganda']) - 1)] ?? null,
+                'occupation_id'       => $opsiMap[$qDemografiIds[4]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[4]]['pilihan_ganda']) - 1)] ?? null,
+                'service_type_id'     => $opsiMap[$qDemografiIds[5]]['pilihan_ganda'][mt_rand(0, count($opsiMap[$qDemografiIds[5]]['pilihan_ganda']) - 1)] ?? null,
                 'respondent_name'     => $respondentNames[$index % count($respondentNames)],
                 'team_name'           => $teamNames[$index % count($teamNames)],
             ];
@@ -236,7 +241,7 @@ class KuesionerSeeder extends Seeder
                 ];
 
                 if ($q['jenis_jawaban'] === 'skala') {
-                    $randomScore = mt_rand(1, 4); 
+                    $randomScore = mt_rand(1, 4); // Skala 1-4 (sesuai opsi, Q6, Q8, Q9, Q10, Q11, Q12, Q13, Q14)
                     $jawaban['opsi_jawaban_id'] = $opsiMap[$q['id']]['skala'][$randomScore] ?? null;
                     $jawaban['jawaban_teks'] = null;
                 } elseif ($q['jenis_jawaban'] === 'pilihan_ganda') {

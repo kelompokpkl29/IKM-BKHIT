@@ -20,7 +20,11 @@ class PertanyaanModel extends Model
         $pertanyaan = $this->where('kuesioner_id', $kuesionerId)
             ->orderBy('urutan', 'ASC')
             ->findAll();
-        $opsiJawabanModel = new OpsiJawabanModel(); // Inisialisasi model OpsiJawaban
+        // Pastikan OpsiJawabanModel diimpor di Controller yang memanggil metode ini,
+        // atau diimpor di sini jika tidak ada cara lain.
+        // Untuk saat ini, kita akan inisialisasi di sini untuk memastikan ketersediaan.
+        $opsiJawabanModel = new OpsiJawabanModel();
+
         foreach ($pertanyaan as &$p) {
             if ($p['jenis_jawaban'] !== 'isian') {
                 $p['opsi'] = $opsiJawabanModel->where('pertanyaan_id', $p['id'])->findAll();

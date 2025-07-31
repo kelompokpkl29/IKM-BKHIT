@@ -37,11 +37,14 @@ class AdminController extends BaseController
         $data['totalKuesioner'] = $this->kuesionerModel->countAllResults();
         $data['activeKuesioner'] = $this->kuesionerModel->where('is_active', 1)->countAllResults();
 
+        // Mengambil total responden dari tabel respondents
         $data['totalResponden'] = $this->respondentsModel->countAllResults();
 
+        // Perhitungan IKM Rata-rata dari jawaban granular (hanya jenis 'skala' dan nilai tidak NULL)
         $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
             ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
             ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->where('jawaban_pengguna.opsi_jawaban_id IS NOT NULL') // Hanya hitung jawaban yang benar-benar ada opsi
             ->countAllResults();
 
         $totalNilaiJawabanSkala = $this->jawabanPenggunaModel
@@ -58,7 +61,21 @@ class AdminController extends BaseController
             $ikmRataRataHasil = ($totalNilaiJawabanSkala / $totalJawabanSkalaDiberikan);
         }
         $data['ikmAverage'] = round($ikmRataRataHasil, 2);
-        if ($data['ikmAverage'] > 5.0) $data['ikmAverage'] = 5.0;
+        if ($data['ikmAverage'] > 5.0) { // Asumsi skala maksimum 5
+            $data['ikmAverage'] = 5.0;
+        }
+
+        // Perhitungan persentase puas (contoh: nilai 3 atau 4 dianggap puas dari skala 1-4/5)
+        $totalPuas = $this->jawabanPenggunaModel
+            ->select('COUNT(jawaban_pengguna.id) as count_puas')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->where('opsi_jawaban.nilai >=', 3) // Misal, nilai 3 atau lebih dianggap puas
+            ->countAllResults();
+        $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
+            ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
+            ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
+            ->countAllResults();
+        $data['persentasePuasHasil'] = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
 
         $data['recentKuesioner'] = $this->kuesionerModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
 
@@ -159,7 +176,7 @@ class AdminController extends BaseController
         // Ambil kuesioner_id dari POST request
         $kuesionerId = $this->request->getPost('kuesioner_id');
 
-        // --- VALIDASI SEDERHANA ---
+        // --- VALIDASI UNTUK PERTANYAAN ---
         $rules = [
             'kuesioner_id'    => 'required|is_natural_no_zero',
             'teks_pertanyaan' => 'required|min_length[5]',
@@ -168,11 +185,11 @@ class AdminController extends BaseController
         ];
         $jenisJawaban = $this->request->getPost('jenis_jawaban');
         if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
-            $rules['opsi_teks'] = 'required|array';
+            $rules['opsi_teks'] = 'required|array'; // Pastikan aturan 'array' dikenali
             $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
             if ($jenisJawaban === 'skala') {
-                $rules['opsi_nilai'] = 'required|array';
-                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
+                $rules['opsi_nilai'] = 'required|array'; // Pastikan aturan 'array' dikenali
+                $rules['opsi_nilai.*'] = 'required|integer|greater_than_equal_to[1]|less_than_equal_to[5]';
             }
         }
         if (!$this->validate($rules)) {
@@ -187,19 +204,23 @@ class AdminController extends BaseController
             'urutan'          => $this->request->getPost('urutan'),
         ];
 
+        // Simpan pertanyaan baru
         $pertanyaanId = $this->pertanyaanModel->insert($pertanyaanData);
 
         if ($pertanyaanId) {
+            // Jika jenis jawaban adalah skala atau pilihan ganda, simpan opsi jawaban
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
                 $opsiTeks = $this->request->getPost('opsi_teks');
-                $opsiNilai = $this->request->getPost('opsi_nilai');
+                $opsiNilai = $this->request->getPost('opsi_nilai'); // Ini akan ada jika jenisnya 'skala'
                 $batchOpsi = [];
+
                 if (!empty($opsiTeks)) {
                     foreach ($opsiTeks as $key => $teks) {
-                        if (!empty($teks)) {
+                        if (!empty(trim($teks))) { // Pastikan teks opsi tidak kosong setelah di-trim
                             $batchOpsi[] = [
                                 'pertanyaan_id' => $pertanyaanId,
                                 'opsi_teks'     => trim($teks),
+                                // Pastikan nilai hanya ditambahkan jika jenisnya 'skala' dan ada nilainya
                                 'nilai'         => ($jenisJawaban === 'skala' && isset($opsiNilai[$key])) ? (int)$opsiNilai[$key] : null,
                             ];
                         }
@@ -231,7 +252,7 @@ class AdminController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Pertanyaan tidak ditemukan.');
         }
 
-        // --- VALIDASI SEDERHANA ---
+        // --- VALIDASI UNTUK UPDATE PERTANYAAN ---
         $rules = [
             'teks_pertanyaan' => 'required|min_length[5]',
             'jenis_jawaban'   => 'required|in_list[skala,pilihan_ganda,isian]',
@@ -243,7 +264,7 @@ class AdminController extends BaseController
             $rules['opsi_teks.*'] = 'required|min_length[1]|max_length[255]';
             if ($jenisJawaban === 'skala') {
                 $rules['opsi_nilai'] = 'required|array';
-                $rules['opsi_nilai.*'] = 'required|is_natural|less_than_equal_to[5]';
+                $rules['opsi_nilai.*'] = 'required|integer|greater_than_equal_to[1]|less_than_equal_to[5]';
             }
         }
         if (!$this->validate($rules)) {
@@ -257,16 +278,17 @@ class AdminController extends BaseController
             'urutan'          => $this->request->getPost('urutan'),
         ];
         if ($this->pertanyaanModel->update($id, $pertanyaanData)) {
-            $jenisJawaban = $this->request->getPost('jenis_jawaban');
+            // Hapus opsi lama terlebih dahulu
             $this->opsiJawabanModel->where('pertanyaan_id', $id)->delete();
 
+            // Kemudian sisipkan opsi baru jika jenisnya skala atau pilihan ganda
             if ($jenisJawaban === 'skala' || $jenisJawaban === 'pilihan_ganda') {
                 $opsiTeks = $this->request->getPost('opsi_teks');
                 $opsiNilai = $this->request->getPost('opsi_nilai');
                 $batchOpsi = [];
                 if (!empty($opsiTeks)) {
                     foreach ($opsiTeks as $key => $teks) {
-                        if (!empty($teks)) {
+                        if (!empty(trim($teks))) {
                             $batchOpsi[] = [
                                 'pertanyaan_id' => $id,
                                 'opsi_teks'     => trim($teks),
@@ -284,6 +306,7 @@ class AdminController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui pertanyaan.');
         }
     }
+
     public function deletePertanyaan($id)
     {
         $pertanyaan = $this->pertanyaanModel->find($id);
@@ -311,7 +334,7 @@ class AdminController extends BaseController
         $userId = session()->get('user_id');
         $user = $this->userModel->find($userId);
 
-        // --- VALIDASI SEDERHANA ---
+        // --- VALIDASI UNTUK UPDATE PROFIL ---
         $rules = [
             'username' => 'required|min_length[3]|max_length[255]',
             'email'    => 'required|valid_email|max_length[255]',
@@ -363,13 +386,14 @@ class AdminController extends BaseController
         $data['kuesionerList'] = $kuesionerList; // Untuk dropdown filter
 
         // Mengambil total responden dari tabel respondents
-        $data['totalRespondenHasil'] = $this->jawabanPenggunaModel->select('COUNT(DISTINCT response_session_id) as total_sessions')->get()->getRow('total_sessions');
+        $data['totalRespondenHasil'] = $this->respondentsModel->countAllResults();
 
         // Perhitungan IKM Rata-rata dari jawaban granular
         // Mengambil semua jawaban dengan jenis 'skala' yang memiliki nilai
         $totalJawabanSkalaDiberikan = $this->jawabanPenggunaModel
             ->join('pertanyaan', 'pertanyaan.id = jawaban_pengguna.pertanyaan_id')
             ->where('pertanyaan.jenis_jawaban', 'skala')
+            ->where('jawaban_pengguna.opsi_jawaban_id IS NOT NULL') // Hanya hitung jawaban yang benar-benar ada opsi
             ->countAllResults();
 
         // Menjumlahkan semua nilai dari jawaban 'skala'
@@ -387,6 +411,9 @@ class AdminController extends BaseController
             $ikmRataRataHasil = ($totalNilaiJawabanSkala / $totalJawabanSkalaDiberikan);
         }
         $data['ikmAverage'] = round($ikmRataRataHasil, 2);
+        if ($data['ikmAverage'] > 5.0) { // Asumsi skala maksimum 5
+            $data['ikmAverage'] = 5.0;
+        }
 
         // Perhitungan persentase puas (contoh: nilai 3 atau 4 dianggap puas dari skala 1-4/5)
         $totalPuas = $this->jawabanPenggunaModel
@@ -397,7 +424,7 @@ class AdminController extends BaseController
         $totalSemuaJawabanSkala = $this->jawabanPenggunaModel
             ->select('COUNT(jawaban_pengguna.id) as count_all_skala')
             ->join('opsi_jawaban', 'opsi_jawaban.id = jawaban_pengguna.opsi_jawaban_id')
-            ->countAllResults(); // Menghitung total semua jawaban yang ada opsi nilai
+            ->countAllResults();
         $data['persentasePuasHasil'] = ($totalSemuaJawabanSkala > 0) ? round(($totalPuas / $totalSemuaJawabanSkala) * 100, 2) : 0;
 
         // Detail hasil per pertanyaan
@@ -421,7 +448,7 @@ class AdminController extends BaseController
                         $detail['statistik'][] = [
                             'opsi_teks' => $opsi['opsi_teks'],
                             'count'     => $count,
-                            'percentage' => $percentage
+                            'percentage' => $percentage,
                         ];
                     }
                     if ($pertanyaan['jenis_jawaban'] === 'skala') {

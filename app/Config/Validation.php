@@ -3,12 +3,14 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
+// PENTING: Perhatikan penggunaan backslash (\) sebagai pemisah namespace.
+// Ini harus 'CodeIgniter\Validation\StrictRules\...' BUKAN 'CodeIgniter::Validation::StrictRules::...'
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
 
-use App\Models\UserModel; 
+use App\Models\UserModel;
 
 class Validation extends BaseConfig
 {
@@ -24,8 +26,6 @@ class Validation extends BaseConfig
         'single' => 'CodeIgniter\Validation\Views\single',
     ];
 
-    // --- Aturan Validasi Kustom ---
-    // Digunakan di AuthController untuk validasi login
     public function validateUser(string $password, string $fields, array $data, ?string &$error = null): bool
     {
         $userModel = new UserModel();
@@ -43,7 +43,6 @@ class Validation extends BaseConfig
         return true;
     }
 
-    // Digunakan di AdminController untuk update profil (memeriksa password lama)
     public function check_old_password(string $inputPassword, string $field, array $data, ?string &$error = null): bool
     {
         $userId = session()->get('user_id');
